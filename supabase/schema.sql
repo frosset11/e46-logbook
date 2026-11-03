@@ -104,3 +104,8 @@ create table public.build_items (
   fitted_on date, removed_on date, notes text, sort int not null default 0,
   created_at timestamptz not null default now(), updated_at timestamptz not null default now(), updated_by text default (auth.jwt() ->> 'email')
 );
+
+-- 3 Nov 2026: editable build sheet sections (rename, reorder, add, delete when empty).
+alter table public.build_items drop constraint if exists build_items_section_check;
+create table public.build_sections (name text primary key, sort int not null default 0, updated_at timestamptz not null default now(), updated_by text default (auth.jwt() ->> 'email'));
+-- same access rules as the ledger

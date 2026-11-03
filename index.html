@@ -452,6 +452,11 @@ body.can-edit .ro-only{display:none!important}
 .buildbox select,.ff select{font:inherit;font-size:16px;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);width:100%}
 .buildbox .ff:last-child{margin-bottom:0}
 .case-dl .linkbtn{min-height:0;text-align:left;font-weight:600}
+.sechd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.sechd h3{margin:0}
+.sec-acts{display:flex;gap:2px;margin:-6px -6px -6px 0}
+.bcost{flex:none;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.build li.emptysec{color:var(--muted);font-size:13.5px;padding:8px 0;border:0}
 </style>
 
 <div class="app">
@@ -568,10 +573,9 @@ body.can-edit .ro-only{display:none!important}
   <!-- BUILD -->
   <section class="panel" id="build" aria-labelledby="sectitle" hidden>
     <div class="ledger-sum build-sum" id="build-sum"></div>
-    <div class="cardhead"><div class="seg" id="build-seg" role="group" aria-label="Filter the build sheet"></div><button class="btn ed-only" type="button" data-act="add-build"><svg-i name="plus"></svg-i>Add part</button></div>
+    <div class="cardhead"><div class="seg" id="build-seg" role="group" aria-label="Filter the build sheet"></div><span class="editbar-actions"><button class="btn ed-only" type="button" data-act="add-section"><svg-i name="plus"></svg-i>Add section</button><button class="btn ed-only" type="button" data-act="add-build"><svg-i name="plus"></svg-i>Add part</button></span></div>
     <div class="card pend-card" id="build-pending" hidden style="margin-bottom:12px"><h2>Bought, not fitted yet</h2><p class="lede">Mark each one fitted once it's on the car. Anything it replaces moves to Removed.</p><ul class="blist" id="build-pending-list"></ul></div>
     <div class="build" id="buildsheet"></div>
-    <p class="lede" style="color:var(--muted);margin:14px 0 0"><span class="ev yes">Invoice</span> means a receipt backs up a part from the listing; <span class="ev">Seller only</span> means it's only in the Cars &amp; Bids listing. <span class="ev yes">Added</span> parts come from your ledger, with what you paid. Tap any part to open it.</p>
   </section>
 
   <!-- TODO -->
@@ -720,7 +724,7 @@ document.querySelectorAll("svg-i").forEach(el=>{el.outerHTML=svgI(el.getAttribut
 const SECTIONS=[
  {id:"overview",g:"Car",label:"Overview",icon:"dash",desc:""},
  {id:"carmap",g:"Car",label:"Car map",icon:"car",desc:"Every record placed on the part of the car it touched."},
- {id:"build",g:"Car",label:"Build sheet",icon:"list",desc:"What's on the car right now: the listing, plus everything you've bought, fitted, removed or sold. Logging a part or a sale in the ledger updates it."},
+ {id:"build",g:"Car",label:"Build sheet",icon:"list",desc:"Everything on the car right now, plus what's waiting to be fitted, removed or sold. Tap any part or section to edit it."},
  {id:"todo",g:"Work",label:"Issues & service",icon:"wrench",desc:"Known problems and the baseline service to do before the first track day. Tap an item to open it, or tick it off when it's done."},
  {id:"notes",g:"Work",label:"Notes",icon:"note",desc:"Reminders and notes for the car. Tick them off when they're done."},
  {id:"ledger",g:"Money",label:"Ledger",icon:"wallet",desc:"Shared costs and income since the purchase on 1 Oct 2026, split 50/50."},
@@ -1086,13 +1090,14 @@ function renderNotes(){
 
 /* ---------- build sheet (live, linked to the ledger) ---------- */
 const EVL={yes:["Invoice","ev yes"],part:["Partly on invoice","ev"],no:["Seller only","ev"]};
-const SECS=["Engine","Drivetrain","Suspension & chassis","Brakes & wheels","Interior","Exterior"];
+let SECS=["Engine","Drivetrain","Suspension & chassis","Brakes & wheels","Interior","Exterior"];
 const BST={fitted:["On the car","p-ok"],pending:["Bought, not fitted","p-warn"],removed:["Removed","p-info"],sold:["Sold","p-info"],spare:["In spares","p-info"]};
 const SECMAP={"Brakes, wheels":"Brakes & wheels"};
 let BI=[];BUILD.forEach(g=>g.items.forEach(i=>BI.push({key:"lb"+BI.length,section:SECMAP[g.h]||g.h,item:i[0],status:"fitted",source:"listing",evidence:i[1],sort:BI.length})));
 EXTRAS.forEach(e=>BI.push({key:"lb"+BI.length,section:"Spares",item:e,status:"spare",source:"listing",sort:BI.length}));
 FILT.build="car";
 const bid=x=>x.id||x.key;
+const edOK=()=>{try{return !!live.editor}catch(e){return false}};
 const modCost=m=>m?LEDGER.filter(l=>(l.type==="Part"||l.type==="Deposit")&&(l.mod||l.item)===m).reduce((a,l)=>a+l.amt,0):0;
 const modFirst=m=>{const d=LEDGER.filter(l=>(l.mod||l.item)===m).map(l=>l.d).sort()[0];return d};
 const replacedBy=x=>BI.find(z=>z.replaces&&z.replaces===x.id);
@@ -1107,12 +1112,12 @@ const SECKEYS=[["Interior",/steering wheel|seat|harness|shift|knob|gauge|cage|pe
  ["Drivetrain",/clutch|flywheel|diff|lsd|gearbox|transmission|axle|driveshaft|guibo|trans mount/],
  ["Engine",/engine|intake|exhaust|header|tune|oil|pulley|coil|plug|injector|radiator|thermostat|cooling|throttle|dme|ecu|fuel/],
  ["Exterior",/wing|lip|skirt|wrap|lamp|light|badge|roundel|grille|hood|bumper|mirror|decal|splitter|diffuser|paint/]];
-const guessSection=s=>{s=String(s||"").toLowerCase();const m=SECKEYS.find(([,re])=>re.test(s));return m?m[0]:"Interior"};
+const guessSection=s=>{s=String(s||"").toLowerCase();const m=SECKEYS.find(([n,re])=>SECS.includes(n)&&re.test(s));return m?m[0]:(SECS.includes("Interior")?"Interior":SECS[0])};
 
 function brow(x){
  const cost=x.source!=="listing"?modCost(x.mod):0,rb=replacedBy(x),sale=x.sold_entry&&LEDGER.find(l=>l.id===x.sold_entry);
  let tag;
- if(x.status==="fitted")tag=x.source==="listing"?`<span class="${EVL[x.evidence]?EVL[x.evidence][1]:"ev"}">${EVL[x.evidence]?EVL[x.evidence][0]:"Listing"}</span>`:`<span class="ev yes">Added${cost?" · "+fmt0(cost):""}</span>`;
+ if(x.status==="fitted")tag=cost?`<span class="bcost">${fmt0(cost)}</span>`:"";
  else if(x.status==="sold")tag=`<span class="ev">Sold${sale?" · "+fmt(-sale.amt):""}</span>`;
  else tag=`<span class="pill ${BST[x.status][1]}">${BST[x.status][0]}</span>`;
  const sub=x.status==="removed"||x.status==="sold"?(rb?`Replaced by ${esc(rb.item)}`:(x.removed_on?"Off the car "+dShort(x.removed_on):"")):(x.status==="pending"&&cost?`Paid ${fmt(cost)}`:"");
@@ -1130,10 +1135,63 @@ function renderBuild(){
  const f=FILT.build,show=x=>f==="all"||(f==="car"&&x.status==="fitted")||(f==="pending"&&x.status==="pending")||(f==="gone"&&(x.status==="removed"||x.status==="sold"))||(f==="spare"&&x.status==="spare");
  $("#build-pending").hidden=!(pend.length&&(f==="car"||f==="all"));
  $("#build-pending-list").innerHTML=pend.map(brow).join("");
- const secs=[...SECS,"Spares"].map(s=>({s,items:BI.filter(x=>x.section===s&&show(x)&&!(x.status==="pending"&&(f==="car"||f==="all"))).sort((a,b)=>(a.sort||0)-(b.sort||0))})).filter(g=>g.items.length);
- $("#buildsheet").innerHTML=secs.map(g=>`<div class="card"><h3>${g.s}</h3><ul>${g.items.map(brow).join("")}</ul></div>`).join("")||`<div class="empty" style="grid-column:1/-1">Nothing in this view.</div>`;
+ const secs=allSecs().map(s=>({s,items:BI.filter(x=>x.section===s&&show(x)&&!(x.status==="pending"&&(f==="car"||f==="all"))).sort((a,b)=>(a.sort||0)-(b.sort||0))})).filter(g=>g.items.length||(edOK()&&(f==="car"||f==="all")&&g.s!=="Spares"));
+ $("#buildsheet").innerHTML=secs.map(g=>`<div class="card"><div class="sechd"><h3>${esc(g.s)}</h3><span class="ed-only sec-acts"><button class="ibtn" type="button" data-add-in="${esc(g.s)}" aria-label="Add a part to ${esc(g.s)}" title="Add part">${svgI("plus")}</button>${g.s!=="Spares"?`<button class="ibtn" type="button" data-edit-sec="${esc(g.s)}" aria-label="Edit the ${esc(g.s)} section" title="Edit section">${svgI("pencil")}</button>`:""}</span></div><ul>${g.items.map(brow).join("")||`<li class="emptysec">No parts yet.</li>`}</ul></div>`).join("")||`<div class="empty" style="grid-column:1/-1">Nothing in this view.</div>`;
  if(window.updateCounts)updateCounts();
 }
+
+/* ---------- editable build sheet sections ---------- */
+let SECORDER=[...SECS,"Spares"];
+const allSecs=()=>{const seen=new Set(SECORDER);BI.forEach(x=>{if(!seen.has(x.section)){seen.add(x.section);SECORDER.splice(SECORDER.indexOf("Spares"),0,x.section)}});return SECORDER.slice()};
+function setSections(rows){SECORDER=rows.slice().sort((a,b)=>a.sort-b.sort).map(r=>r.name);if(!SECORDER.includes("Spares"))SECORDER.push("Spares");SECS.length=0;SECORDER.filter(n=>n!=="Spares").forEach(n=>SECS.push(n))}
+function openSection(name){
+ const has=!!name,list=SECS.slice(),i=list.indexOf(name),count=has?BI.filter(x=>x.section===name).length:0;
+ openDrawer(has?"Edit section":"Add section",`<form id="f-sec" novalidate>
+  <div class="ff"><label for="sec-n">Section name</label><input id="sec-n" type="text" value="${esc(name||"")}" placeholder="e.g. Safety, Electrical, Aero" required><p class="ferr" hidden></p></div>
+  ${has?`<p class="lede">${count} part${count===1?"":"s"} in this section.</p>
+  <div class="dr-actions" style="margin-bottom:16px"><button class="btn" type="button" id="sec-up"${i<=0?" disabled":""}>Move earlier</button><button class="btn" type="button" id="sec-down"${i<0||i>=list.length-1?" disabled":""}>Move later</button></div>`:""}
+  <div class="formerr" id="sec-err" hidden></div>
+  <div class="dr-actions"><button class="btn primary" type="submit" id="sec-go">${has?"Save name":"Add section"}</button><button class="btn" type="button" data-act="close">Cancel</button>${has?`<button class="btn danger" type="button" id="sec-del" style="margin-left:auto">Delete section</button>`:""}</div>
+  <div id="sec-confirm"></div></form>`,()=>{
+  const f=$("#f-sec");
+  const ok=bindValidation(f,{"sec-n":v=>{const t=v.trim();if(!t)return"Name the section.";if(t.toLowerCase()==="spares")return"Spares is kept for parts that aren't on the car.";if(t!==name&&allSecs().some(n=>n.toLowerCase()===t.toLowerCase()))return"There's already a section with that name.";return""}});
+  const fail=e=>{$("#sec-err").textContent="Couldn't save. "+friendly(e);$("#sec-err").hidden=false};
+  f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;const t=$("#sec-n").value.trim();if(has&&t===name){closeDrawer();return}
+   const b=$("#sec-go");b.disabled=true;b.textContent="Saving…";
+   if(has){
+    const r=await db.from("build_sections").update({name:t}).eq("name",name).select();
+    if(r.error||!r.data.length){b.disabled=false;b.textContent="Save name";return fail(r.error||{message:"permission denied"})}
+    const r2=await db.from("build_items").update({section:t}).eq("section",name).select();
+    if(r2.error){b.disabled=false;b.textContent="Save name";return fail(r2.error)}
+    toast("Section renamed");
+   }else{
+    const r=await db.from("build_sections").insert({name:t,sort:SECS.length}).select();
+    if(r.error||!r.data.length){b.disabled=false;b.textContent="Add section";return fail(r.error||{message:"permission denied"})}
+    toast("Section added");
+   }
+   closeDrawer();await loadWork().catch(()=>{});
+  });
+  if(has){
+   const move=async d=>{const j=i+d;const order=list.slice();[order[i],order[j]]=[order[j],order[i]];
+    const res=await Promise.all(order.map((n,k)=>db.from("build_sections").update({sort:k}).eq("name",n).select()));
+    if(res.some(r=>r.error))return fail(res.find(r=>r.error).error);
+    await loadWork().catch(()=>{});openSection(name);toast(d<0?"Moved earlier":"Moved later")};
+   $("#sec-up").addEventListener("click",()=>move(-1));$("#sec-down").addEventListener("click",()=>move(1));
+   $("#sec-del").addEventListener("click",()=>{
+    if(count){$("#sec-confirm").innerHTML=`<div class="confirm"><p style="margin:0">Move or delete the ${count} part${count===1?"":"s"} in ${esc(name)} first, then delete the section.</p></div>`;return}
+    confirmDelete("#sec-confirm",`Delete the ${name} section?`,"Delete section",async()=>{
+     const r=await db.from("build_sections").delete().eq("name",name).select();if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
+     closeDrawer();toast("Section deleted");loadWork().catch(()=>{})});
+   });
+  }
+ });
+}
+document.addEventListener("click",e=>{
+ const es=e.target.closest("[data-edit-sec]");if(es){openSection(es.dataset.editSec);return}
+ const ai=e.target.closest("[data-add-in]");if(ai){openBuild(null,{section:ai.dataset.addIn});return}
+ if(e.target.closest("[data-act=add-section]"))openSection(null);
+});
+
 renderBuild();
 
 async function setBuild(x,row,msg){
@@ -1151,7 +1209,6 @@ document.addEventListener("click",async e=>{
 
 function buildCaseHTML(x){
  const cost=modCost(x.mod),rb=replacedBy(x),rep=x.replaces&&BI.find(z=>z.id===x.replaces),sale=x.sold_entry&&LEDGER.find(l=>l.id===x.sold_entry);
- const src=x.source==="listing"?`Cars &amp; Bids listing${EVL[x.evidence]?" · "+EVL[x.evidence][0].toLowerCase():""}`:x.source==="ledger"?"Bought by you (ledger)":"Added by hand";
  return `<div class="case">
   <div class="case-head"><span class="pill ${BST[x.status][1]}">${BST[x.status][0]}</span><h3>${esc(x.item)}</h3></div>
   ${statusPicker("bs",Object.entries(BST).map(([v,[l]])=>[v,l]),x.status,"Status")}
@@ -1160,7 +1217,6 @@ function buildCaseHTML(x){
    <div class="dr-actions" style="margin-bottom:16px"><button class="btn primary" type="button" id="bs-logsale">Log the sale</button><button class="btn" type="button" id="bs-justsold">Just mark sold</button></div></div>
   <dl class="case-dl">
    <div><dt>Section</dt><dd>${esc(x.section)}</dd></div>
-   <div><dt>Source</dt><dd>${src}</dd></div>
    ${cost?`<div><dt>Cost</dt><dd>${fmt(cost)} <span class="muted">(${fmt(cost/2)} each)</span>${modFirst(x.mod)?` · first paid ${dShort(modFirst(x.mod))}`:""}</dd></div>`:""}
    ${rep?`<div><dt>Replaces</dt><dd><button class="linkbtn" type="button" data-open-build="${bid(rep)}">${esc(rep.item)}</button></dd></div>`:""}
    ${rb?`<div><dt>Replaced by</dt><dd><button class="linkbtn" type="button" data-open-build="${bid(rb)}">${esc(rb.item)}</button></dd></div>`:""}
@@ -1194,12 +1250,12 @@ function repOptions(sec,selfId,cur){
  const c=BI.filter(z=>z.id&&z.id!==selfId&&(z.status==="fitted"||z.status==="removed")&&z.section!=="Spares");
  return `<option value="">Nothing, it's new</option>`+SECS.map(s=>{const g=c.filter(z=>z.section===s);return g.length?`<optgroup label="${s}">${g.map(z=>`<option value="${z.id}"${z.id===cur?" selected":""}>${esc(z.item)}</option>`).join("")}</optgroup>`:""}).join("");
 }
-function openBuild(x){
- const has=!!x;x=x||{section:"Interior",status:"fitted"};
+function openBuild(x,pre){
+ const has=!!x;x=x||{section:(pre&&pre.section)||SECS[0]||"Interior",status:"fitted"};
  const mods=[...new Set(LEDGER.filter(l=>l.type==="Part"||l.type==="Deposit").map(l=>l.mod||l.item))];
  openDrawer(has?"Edit part":"Add part",`<form id="f-bi" novalidate>
   <div class="ff"><label for="bi-t">Part</label><input id="bi-t" type="text" value="${esc(x.item||"")}" placeholder="e.g. Hawk DTC-60 front pads" required><p class="ferr" hidden></p></div>
-  <div class="ff"><label for="bi-sec">Section</label><select id="bi-sec">${[...SECS,"Spares"].map(s=>`<option${s===x.section?" selected":""}>${s}</option>`).join("")}</select></div>
+  <div class="ff"><label for="bi-sec">Section</label><select id="bi-sec">${allSecs().map(s=>`<option${s===x.section?" selected":""}>${esc(s)}</option>`).join("")}</select></div>
   ${statusPicker("bi-s",Object.entries(BST).map(([v,[l]])=>[v,l]),x.status,"Status").replace(' ed-only','')}
   <div class="ff"><label for="bi-rep">Replaces <span class="opt">optional</span></label><select id="bi-rep">${repOptions(x.section,x.id,x.replaces)}</select><p class="hint">When this part is on the car, the one it replaces moves to Removed.</p></div>
   <div class="ff"><label for="bi-mod">Ledger upgrade group <span class="opt">optional</span></label><input id="bi-mod" type="text" list="bi-mods" autocomplete="off" value="${esc(x.mod||"")}"><datalist id="bi-mods">${mods.map(m=>`<option value="${esc(m)}">`).join("")}</datalist><p class="hint">Links the part to its payments so the cost shows here.</p></div>
@@ -1209,6 +1265,7 @@ function openBuild(x){
   const f=$("#f-bi");const ok=bindValidation(f,{"bi-t":v=>v.trim()?"":"Name the part."});
   if(!has)$("#bi-t").addEventListener("change",()=>{const v=$("#bi-t").value;if(!$("#bi-sec").dataset.touched)$("#bi-sec").value=guessSection(v);if(!$("#bi-rep").dataset.touched){const m=bestMatch(v,BI.filter(z=>z.id&&z.status==="fitted"&&z.section===$("#bi-sec").value));$("#bi-rep").value=m?m.id:""}});
   ["bi-sec","bi-rep"].forEach(i=>$("#"+i).addEventListener("change",e=>{e.target.dataset.touched="1"}));
+  if(pre&&pre.section)$("#bi-sec").dataset.touched="1";
   f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;const b=$("#bi-go");b.disabled=true;b.textContent="Saving…";
    const st=f.querySelector("[name=bi-s]:checked").value;
    const row={item:$("#bi-t").value.trim(),section:$("#bi-sec").value,status:st,replaces:$("#bi-rep").value||null,mod:$("#bi-mod").value.trim()||null,notes:$("#bi-n").value.trim()||null};
@@ -1742,6 +1799,7 @@ async function loadWork(){
  const [i,s,n,bq]=await Promise.all([db.from("issues").select("*").order("sort").order("created_at"),db.from("service_items").select("*").order("sort").order("created_at"),db.from("notes").select("*").order("created_at",{ascending:false}),db.from("build_items").select("*").order("sort").order("created_at")]);
  if(i.error||s.error||n.error)throw(i.error||s.error||n.error);
  if(!bq.error)BI=bq.data;
+ const sq=await db.from("build_sections").select("*").order("sort");if(!sq.error&&sq.data.length)setSections(sq.data);
  ISS=i.data.map(r=>({id:r.id,owner:r.owner,cat:r.category,upd_at:r.updated_at,upd_by:r.updated_by,t:r.title,src:r.source,n:r.notes,p:r.priority,resolved:r.resolved,resolved_on:r.resolved_on,resolution:r.resolution,sort:r.sort}));
  SVC=s.data.map(r=>({id:r.id,owner:r.owner,upd_at:r.updated_at,upd_by:r.updated_by,t:r.item,last:r.last_done,s:r.status,prev:r.prev_status,done_on:r.done_on,n:r.notes,sort:r.sort}));
  NOTES=n.data;
