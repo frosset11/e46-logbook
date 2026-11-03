@@ -1366,6 +1366,7 @@ function wireShowPw(form){const c=form.querySelector("[data-showpw]");if(c)c.add
 const authMsg=e=>{const m=(e&&e.message)||"";
  if(/invalid login credentials/i.test(m))return"That email and password don't match. Check for typos. If you've never set a password, choose Create password above.";
  if(/email not confirmed/i.test(m))return"This account still needs email confirmation, which is switched on in Supabase. Turn off Authentication → Sign In / Providers → Email → Confirm email, then try again.";
+ if(/signups? not allowed|signup.*disabled/i.test(m))return"Creating accounts is switched off in Supabase. If you already have an account, choose Sign in. Otherwise turn on Authentication → Sign In / Providers → Allow new users to sign up.";
  if(/database error saving new user|limited to the E46 owners/i.test(m))return"Only Felipe's and Bugsy's emails can have an account here.";
  if(/already registered|already exists/i.test(m))return"There's already an account for this email. Choose Sign in. If you only used email links before, sign in on a device where you're still signed in and choose Set password.";
  if(/rate|429/i.test(m))return"Too many attempts in a short time. Wait a minute, then try again.";
