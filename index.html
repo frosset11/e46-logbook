@@ -406,6 +406,24 @@ body.can-edit .ro-only{display:none!important}
 .confirm.inrow{flex-basis:100%;margin-top:4px}
 .signin-hint{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .signin-hint p{margin:0;color:var(--muted)}
+/* ---------- case rows + case view ---------- */
+.caserow{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;background:none;border:0;padding:6px 8px;margin:-6px -8px;border-radius:8px;cursor:pointer;color:inherit;font:inherit}
+.caserow:hover{background:var(--surface-2)}
+.caserow:focus-visible{outline:2px solid var(--fern);outline-offset:0}
+.caserow .body{display:flex;flex-direction:column;flex:1;min-width:0}
+.caserow>svg{flex:none;width:18px;height:18px;color:var(--muted)}
+.caserow .t{font-weight:600}
+.caserow .clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.case-head{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:18px}
+.case-head h3{font-family:var(--body);font-size:19px;font-weight:600;line-height:1.3}
+.case-dl{margin:4px 0 0;border-top:1px solid var(--line)}
+.case-dl>div{display:grid;grid-template-columns:118px minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.case-dl dt{font-weight:600;font-size:13.5px;color:var(--muted)}
+.case-dl dd{margin:0;font-size:15px;min-width:0}
+.case-dl .pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.case-dl .muted{color:var(--muted)}
+@media (max-width:420px){.case-dl>div{grid-template-columns:1fr;gap:2px}}
+.case-meta{color:var(--muted);font-size:12.5px;margin:10px 0 16px}
 </style>
 
 <div class="app">
@@ -675,6 +693,7 @@ const ICON={
  note:'<path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/>',
  trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
  check:'<path d="M20 6 9 17l-5-5"/>',
+ chev:'<path d="m9 18 6-6-6-6"/>',
  pencil:'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
  login:'<path d="m10 17 5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>',
  refresh:'<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>'
@@ -686,7 +705,7 @@ const SECTIONS=[
  {id:"overview",g:"Car",label:"Overview",icon:"dash",desc:""},
  {id:"carmap",g:"Car",label:"Car map",icon:"car",desc:"Every record placed on the part of the car it touched."},
  {id:"build",g:"Car",label:"Build sheet",icon:"list",desc:"Equipment the seller listed on Cars & Bids, checked against the invoices."},
- {id:"todo",g:"Work",label:"Issues & service",icon:"wrench",desc:"Known problems and the baseline service to do before the first track day. Tick items off as they get done."},
+ {id:"todo",g:"Work",label:"Issues & service",icon:"wrench",desc:"Known problems and the baseline service to do before the first track day. Tap an item to open it, or tick it off when it's done."},
  {id:"notes",g:"Work",label:"Notes",icon:"note",desc:"Reminders and notes for the car. Tick them off when they're done."},
  {id:"ledger",g:"Money",label:"Ledger",icon:"wallet",desc:"Shared costs and income since the purchase on 1 Oct 2026, split 50/50."},
  {id:"upgrades",g:"Money",label:"Upgrades",icon:"trend",desc:"Every mod with its full cost, built from the ledger."},
@@ -997,8 +1016,8 @@ $("#extras").innerHTML=EXTRAS.map(e=>`<li>${esc(e)}</li>`).join("");
 const PL={crit:["Urgent","p-crit"],warn:["Soon","p-warn"],info:["Low","p-info"],ok:["OK","p-ok"]};
 const DL={crit:["Overdue / unknown","p-crit"],warn:["Check","p-warn"],ok:["Done","p-ok"]};
 const RANK={crit:0,warn:1,info:2,ok:3};
-let ISS=ISSUES.map((i,k)=>({t:i[0],src:i[1],n:i[2],p:i[3],resolved:false,sort:k}));
-let SVC=DUE.map((d,k)=>({t:d[0],last:d[1],s:d[2],n:d[3],sort:k,done_on:null}));
+let ISS=ISSUES.map((i,k)=>({key:"li"+k,t:i[0],src:i[1],n:i[2],p:i[3],resolved:false,sort:k}));
+let SVC=DUE.map((d,k)=>({key:"ls"+k,t:d[0],last:d[1],s:d[2],n:d[3],sort:k,done_on:null}));
 let NOTES=[];
 const openCrit=()=>ISS.filter(i=>!i.resolved&&i.p==="crit").length+SVC.filter(d=>d.s==="crit").length;
 const dueOk=()=>SVC.filter(d=>d.s==="ok").length;
@@ -1019,19 +1038,17 @@ function renderWork(){
  segment($("#iss-seg"),"iss",[{v:"open",l:"Open",n:open.length},{v:"crit",l:"Urgent",n:cnt("crit")},{v:"warn",l:"Soon",n:cnt("warn")},{v:"info",l:"Low",n:cnt("info")},{v:"done",l:"Done",n:iss.length-open.length}]);
  const f=FILT.iss,list=iss.filter(x=>f==="done"?x.resolved:(!x.resolved&&(f==="open"||x.p===f)));
  $("#iss-list").innerHTML=list.map(x=>`<li class="${x.resolved?"is-done":""}">${tick("data-tick-issue",x.id,x.resolved,"Mark “"+x.t+"” as done")}
-  <div class="body"><div class="t"><span class="pill ${x.resolved?"p-ok":PL[x.p][1]}">${x.resolved?"Done":PL[x.p][0]}</span> ${esc(x.t)}</div>
-  ${x.resolved?`<div class="res">${svgI("check")}Done${x.resolved_on?" "+dShort(x.resolved_on):""}${x.resolution?": "+esc(x.resolution):""}</div>`:""}
-  <div class="src">Source: ${esc(x.src||"—")}</div>${x.n?`<div class="n">${esc(x.n)}</div>`:""}</div>
-  ${x.id?`<button class="ibtn ed-only" type="button" data-edit-issue="${x.id}" aria-label="Edit ${esc(x.t)}" title="Edit">${svgI("pencil")}</button>`:"<span></span>"}</li>`).join("")
+  <button class="caserow" type="button" data-open-issue="${x.id||x.key}" aria-label="Open issue: ${esc(x.t)}"><span class="body"><span class="t"><span class="pill ${x.resolved?"p-ok":PL[x.p][1]}">${x.resolved?"Completed":PL[x.p][0]}</span> ${esc(x.t)}</span>
+  ${x.resolved?`<span class="res">${svgI("check")}Completed${x.resolved_on?" "+dShort(x.resolved_on):""}${x.resolution?": "+esc(x.resolution):""}</span>`:""}
+  <span class="src">Source: ${esc(x.src||"—")}</span>${x.n?`<span class="n clamp">${esc(x.n)}</span>`:""}</span>${svgI("chev")}</button></li>`).join("")
   ||`<li class="emptyrow">${f==="done"?"Nothing ticked off yet.":"No open issues in this group."}</li>`;
 
  const due=SVC.slice().sort((a,b)=>(RANK[a.s]-RANK[b.s])||(a.sort-b.sort));
  const dc=s=>due.filter(x=>x.s===s).length;
  segment($("#due-seg"),"due",[{v:"all",l:"All",n:due.length},{v:"crit",l:"Overdue",n:dc("crit")},{v:"warn",l:"Check",n:dc("warn")},{v:"ok",l:"Done",n:dc("ok")}]);
  $("#due-list").innerHTML=due.filter(x=>FILT.due==="all"||x.s===FILT.due).map(x=>`<li class="${x.s==="ok"?"is-done":""}">${tick("data-tick-due",x.id,x.s==="ok","Mark “"+x.t+"” as done")}
-  <div class="body"><div class="t"><span class="pill ${DL[x.s][1]}">${DL[x.s][0]}</span> ${esc(x.t)}</div>
-  <div class="src">${x.s==="ok"&&x.done_on?"Done "+dShort(x.done_on):"Last documented: "+esc(x.last||"—")}</div>${x.n?`<div class="n">${esc(x.n)}</div>`:""}</div>
-  ${x.id?`<button class="ibtn ed-only" type="button" data-edit-due="${x.id}" aria-label="Edit ${esc(x.t)}" title="Edit">${svgI("pencil")}</button>`:"<span></span>"}</li>`).join("")
+  <button class="caserow" type="button" data-open-due="${x.id||x.key}" aria-label="Open service item: ${esc(x.t)}"><span class="body"><span class="t"><span class="pill ${DL[x.s][1]}">${x.s==="ok"?"Completed":DL[x.s][0]}</span> ${esc(x.t)}</span>
+  <span class="src">${x.s==="ok"&&x.done_on?"Completed "+dShort(x.done_on):"Last documented: "+esc(x.last||"—")}</span>${x.n?`<span class="n clamp">${esc(x.n)}</span>`:""}</span>${svgI("chev")}</button></li>`).join("")
   ||`<li class="emptyrow">Nothing in this group.</li>`;
  const ok=dueOk(),pct=due.length?Math.round(ok/due.length*100):0;
  ["#due","#rd"].forEach(p=>{$(p+"-prog-l").textContent=`${ok} of ${due.length} baseline items done`;const b=$(p+"-bar");b.setAttribute("aria-valuenow",pct);b.setAttribute("aria-valuemin",0);b.setAttribute("aria-valuemax",100);b.querySelector("i").style.width=pct+"%"});
@@ -1297,7 +1314,7 @@ function paintSync(){
  s.className="sync live";s.innerHTML=`<i></i>Live · updated ${t}`;
  const email=live.session?.user?.email||"";
  if(!live.session){a.innerHTML=`<button class="btn" type="button" data-act="signin">${svgI("login")}Sign in to edit</button>`}
- else if(live.editor){a.innerHTML=`<button class="btn primary" type="button" data-act="add">${svgI("plus")}Add entry</button><button class="btn" type="button" data-act="add-planned">${svgI("plus")}Add planned purchase</button><span class="who-chip">${esc(email)}</span><button class="btn" type="button" data-act="signout">Sign out</button>`}
+ else if(live.editor){a.innerHTML=`<button class="btn primary" type="button" data-act="add">${svgI("plus")}Add entry</button><button class="btn" type="button" data-act="add-planned">${svgI("plus")}Add planned purchase</button><span class="who-chip">${esc(email)}</span><button class="btn" type="button" data-act="setpw">Set password</button><button class="btn" type="button" data-act="signout">Sign out</button>`}
  else{a.innerHTML=`<span class="who-chip">${esc(email)} can view but not edit this ledger.</span><button class="btn" type="button" data-act="signout">Sign out</button>`}
 }
 
@@ -1328,8 +1345,8 @@ document.addEventListener("keydown",e=>{
 function fieldErr(input,msg){const box=input.closest(".ff");const p=box.querySelector(".ferr");input.setAttribute("aria-invalid",msg?"true":"false");if(msg){p.textContent=msg;p.hidden=false}else{p.hidden=true}}
 function bindValidation(form,rules){
  Object.entries(rules).forEach(([id,fn])=>{const el=form.querySelector("#"+id);
-  el.addEventListener("blur",()=>fieldErr(el,fn(el.value)));
-  el.addEventListener("input",()=>{if(el.getAttribute("aria-invalid")==="true")fieldErr(el,fn(el.value))})});
+  el.addEventListener("blur",()=>{if(el.dataset.touched)fieldErr(el,fn(el.value))});
+  el.addEventListener("input",()=>{el.dataset.touched="1";if(el.getAttribute("aria-invalid")==="true")fieldErr(el,fn(el.value))})});
  return()=>{let firstBad=null;Object.entries(rules).forEach(([id,fn])=>{const el=form.querySelector("#"+id);const m=fn(el.value);fieldErr(el,m);if(m&&!firstBad)firstBad=el});if(firstBad)firstBad.focus();return!firstBad};
 }
 const friendly=e=>{const m=(e&&(e.message||e.error_description))||"Unknown error";
@@ -1338,20 +1355,66 @@ const friendly=e=>{const m=(e&&(e.message||e.error_description))||"Unknown error
  if(/fetch|network/i.test(m))return"No connection to the database. Check your internet and try again.";
  return m};
 
-/* ---------- sign in ---------- */
-function openSignIn(){
- openDrawer("Sign in to edit",`<form id="f-si" novalidate>
-  <p class="lede">Only Felipe and Bugsy can change the ledger. You'll get a one-time sign-in link by email.</p>
-  <div class="ff"><label for="si-email">Email</label><input id="si-email" type="email" autocomplete="email" inputmode="email" required><p class="ferr" hidden></p></div>
+/* ---------- sign in with email + password ---------- */
+const pwField=(id,label,auto,hint)=>`<div class="ff"><label for="${id}">${label}</label><input id="${id}" type="password" autocomplete="${auto}" required>${hint?`<p class="hint">${hint}</p>`:""}<p class="ferr" hidden></p></div>`;
+const showPw=`<label class="checkrow" style="margin-top:-6px"><input type="checkbox" data-showpw> Show password</label>`;
+const emailRule=v=>!v.trim()?"Enter your email.":(!/^\S+@\S+\.\S+$/.test(v.trim())?"Enter a full email address, like name@example.com.":"");
+const pwRule=v=>v.length>=8?"":"Use at least 8 characters.";
+function wireShowPw(form){const c=form.querySelector("[data-showpw]");if(c)c.addEventListener("change",()=>form.querySelectorAll("input[type=password],input[data-pw]").forEach(i=>{i.dataset.pw="1";i.type=c.checked?"text":"password"}))}
+const authMsg=e=>{const m=(e&&e.message)||"";
+ if(/invalid login credentials/i.test(m))return"That email and password don't match. Check for typos. If you've never set a password, choose Create password above.";
+ if(/email not confirmed/i.test(m))return"This account still needs email confirmation, which is switched on in Supabase. Turn off Authentication → Sign In / Providers → Email → Confirm email, then try again.";
+ if(/database error saving new user|limited to the E46 owners/i.test(m))return"Only Felipe's and Bugsy's emails can have an account here.";
+ if(/already registered|already exists/i.test(m))return"There's already an account for this email. Choose Sign in. If you only used email links before, sign in on a device where you're still signed in and choose Set password.";
+ if(/rate|429/i.test(m))return"Too many attempts in a short time. Wait a minute, then try again.";
+ if(/password.*(weak|short|characters)/i.test(m))return"That password is too weak. Use at least 8 characters, mixing letters and numbers.";
+ return friendly(e)};
+function openSignIn(mode){
+ mode=mode==="create"?"create":"signin";
+ const create=mode==="create";
+ openDrawer(create?"Create your password":"Sign in to edit",`
+  <div class="seg" role="group" aria-label="Sign in or create a password" style="margin-bottom:16px"><button type="button" aria-pressed="${!create}" data-act="signin">Sign in</button><button type="button" aria-pressed="${create}" data-act="signup">Create password</button></div>
+  <form id="f-si" novalidate>
+  <p class="lede">${create?"First time here? Set a password for your email. Only Felipe's and Bugsy's emails can create one.":"Only Felipe and Bugsy can change the logbook."}</p>
+  <div class="ff"><label for="si-email">Email</label><input id="si-email" type="email" autocomplete="username" inputmode="email" required><p class="ferr" hidden></p></div>
+  ${create?pwField("si-pw","New password","new-password","At least 8 characters.")+pwField("si-pw2","Confirm password","new-password"):pwField("si-pw","Password","current-password")}
+  ${showPw}
   <div class="formerr" id="si-err" hidden></div>
-  <div class="dr-actions"><button class="btn primary" type="submit" id="si-go">Email me a sign-in link</button><button class="btn" type="button" data-act="close">Cancel</button></div></form>`,()=>{
-  const f=$("#f-si");const ok=bindValidation(f,{"si-email":v=>!v.trim()?"Enter your email.":(!/^\S+@\S+\.\S+$/.test(v.trim())?"Enter a full email address, like name@example.com.":"")});
+  <div class="dr-actions"><button class="btn primary" type="submit" id="si-go">${create?"Create account":"Sign in"}</button><button class="btn" type="button" data-act="close">Cancel</button></div></form>`,()=>{
+  const f=$("#f-si");wireShowPw(f);
+  try{const last=localStorage.getItem("e46email");if(last)$("#si-email").value=last}catch(_){}
+  if($("#si-email").value)setTimeout(()=>$("#si-pw").focus(),0);
+  const rules={"si-email":emailRule,"si-pw":create?pwRule:(v=>v?"":"Enter your password.")};
+  if(create)rules["si-pw2"]=v=>v===$("#si-pw").value?"":"The two passwords don't match.";
+  const ok=bindValidation(f,rules);
   f.addEventListener("submit",async e=>{e.preventDefault();if(!ok())return;
-   const email=$("#si-email").value.trim().toLowerCase(),b=$("#si-go");b.disabled=true;b.textContent="Sending…";$("#si-err").hidden=true;
-   try{localStorage.setItem("e46tab",(location.hash.slice(1)||"ledger"))}catch(_){}
-   const {error}=await db.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});
-   if(error){b.disabled=false;b.textContent="Email me a sign-in link";const m=/rate|429|seconds/i.test(error.message)?"Too many sign-in emails in a short time. Wait a minute, then try again.":friendly(error);$("#si-err").textContent=m;$("#si-err").hidden=false;return}
-   $("#dr-body").innerHTML=`<p>Check <b>${esc(email)}</b> for an email from Supabase and open the link <b>on this device</b>. The link works once and expires after an hour.</p><div class="dr-actions"><button class="btn" type="button" data-act="signin">Use a different email</button><button class="btn" type="button" data-act="close">Close</button></div>`;
+   const email=$("#si-email").value.trim().toLowerCase(),password=$("#si-pw").value,b=$("#si-go"),label=b.textContent;
+   b.disabled=true;b.textContent=create?"Creating…":"Signing in…";$("#si-err").hidden=true;
+   const r=create?await db.auth.signUp({email,password}):await db.auth.signInWithPassword({email,password});
+   let err=r.error;
+   if(!err&&create&&r.data.user&&Array.isArray(r.data.user.identities)&&r.data.user.identities.length===0)err={message:"already registered"};
+   if(!err&&create&&!r.data.session)err={message:"email not confirmed"};
+   if(err){b.disabled=false;b.textContent=label;$("#si-err").textContent=authMsg(err);$("#si-err").hidden=false;return}
+   try{localStorage.setItem("e46email",email)}catch(_){}
+   closeDrawer();toast(create?"Account created. You're signed in.":"Signed in");
+  });
+ });
+}
+function openSetPassword(){
+ const email=live.session?.user?.email||"";
+ openDrawer("Set a password",`<form id="f-pw" novalidate>
+  <p class="lede">Set a password for <b>${esc(email)}</b> so you can sign in on any device without an email link.</p>
+  <input type="email" autocomplete="username" value="${esc(email)}" hidden>
+  ${pwField("pw-1","New password","new-password","At least 8 characters.")}${pwField("pw-2","Confirm password","new-password")}${showPw}
+  <div class="formerr" id="pw-err" hidden></div>
+  <div class="dr-actions"><button class="btn primary" type="submit" id="pw-go">Save password</button><button class="btn" type="button" data-act="close">Cancel</button></div></form>`,()=>{
+  const f=$("#f-pw");wireShowPw(f);
+  const ok=bindValidation(f,{"pw-1":pwRule,"pw-2":v=>v===$("#pw-1").value?"":"The two passwords don't match."});
+  f.addEventListener("submit",async e=>{e.preventDefault();if(!ok())return;const b=$("#pw-go");b.disabled=true;b.textContent="Saving…";
+   const {error}=await db.auth.updateUser({password:$("#pw-1").value});
+   if(error){b.disabled=false;b.textContent="Save password";$("#pw-err").textContent=/reauthenticat|recent/i.test(error.message)?"Supabase wants a recent sign-in before changing the password. Sign out, sign back in, then try again.":/same/i.test(error.message)?"That's already your password. Choose a different one.":authMsg(error);$("#pw-err").hidden=false;return}
+   try{localStorage.setItem("e46email",email)}catch(_){}
+   closeDrawer();toast("Password saved");
   });
  });
 }
@@ -1449,6 +1512,8 @@ document.addEventListener("click",async e=>{
  const act=a.dataset.act;
  if(act==="close")closeDrawer();
  else if(act==="signin")openSignIn();
+ else if(act==="signup")openSignIn("create");
+ else if(act==="setpw")openSetPassword();
  else if(act==="add")openEntry(null,a.dataset.type?{type:a.dataset.type}:null);
  else if(act==="add-planned")openPlanned(null);
  else if(act==="retry"){live.state="loading";paintSync();loadLive()}
@@ -1469,8 +1534,8 @@ async function loadWork(){
  if(!db)return;
  const [i,s,n]=await Promise.all([db.from("issues").select("*").order("sort").order("created_at"),db.from("service_items").select("*").order("sort").order("created_at"),db.from("notes").select("*").order("created_at",{ascending:false})]);
  if(i.error||s.error||n.error)throw(i.error||s.error||n.error);
- ISS=i.data.map(r=>({id:r.id,t:r.title,src:r.source,n:r.notes,p:r.priority,resolved:r.resolved,resolved_on:r.resolved_on,resolution:r.resolution,sort:r.sort}));
- SVC=s.data.map(r=>({id:r.id,t:r.item,last:r.last_done,s:r.status,prev:r.prev_status,done_on:r.done_on,n:r.notes,sort:r.sort}));
+ ISS=i.data.map(r=>({id:r.id,upd_at:r.updated_at,upd_by:r.updated_by,t:r.title,src:r.source,n:r.notes,p:r.priority,resolved:r.resolved,resolved_on:r.resolved_on,resolution:r.resolution,sort:r.sort}));
+ SVC=s.data.map(r=>({id:r.id,upd_at:r.updated_at,upd_by:r.updated_by,t:r.item,last:r.last_done,s:r.status,prev:r.prev_status,done_on:r.done_on,n:r.notes,sort:r.sort}));
  NOTES=n.data;
  renderWork();renderNotes();
 }
@@ -1499,27 +1564,26 @@ function openIssue(x){
  const has=!!x;x=x||{p:"warn"};
  openDrawer(has?"Edit issue":"Add issue",`<form id="f-is" novalidate>
   <div class="ff"><label for="is-t">Issue</label><input id="is-t" type="text" value="${esc(x.t||"")}" placeholder="e.g. Clutch pedal squeaks" required><p class="ferr" hidden></p></div>
-  <fieldset class="ff"><legend>Priority</legend><div class="choice">${[["crit","Urgent"],["warn","Soon"],["info","Low"]].map(([v,l])=>`<label><input type="radio" name="is-p" value="${v}"${x.p===v?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>
+  <fieldset class="ff"><legend>Status</legend><div class="choice">${ISTAT.map(([v,l])=>`<label><input type="radio" name="is-p" value="${v}"${(x.resolved?"done":x.p)===v?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>
   <div class="ff"><label for="is-src">Source <span class="opt">optional</span></label><input id="is-src" type="text" value="${esc(x.src||"")}" placeholder="e.g. You, Bugsy, shop name"><p class="ferr" hidden></p></div>
   <div class="ff"><label for="is-n">Notes <span class="opt">optional</span></label><textarea id="is-n" placeholder="Likely cause, what to check, parts needed">${esc(x.n||"")}</textarea><p class="ferr" hidden></p></div>
-  <label class="checkrow"><input type="checkbox" id="is-done"${x.resolved?" checked":""}> Fixed / done</label>
   <div id="is-done-f"${x.resolved?"":" hidden"}>
-   <div class="ff"><label for="is-on">Done on</label><input id="is-on" type="date" value="${x.resolved_on||today()}"><p class="ferr" hidden></p></div>
+   <div class="ff"><label for="is-on">Completed on</label><input id="is-on" type="date" value="${x.resolved_on||today()}"><p class="ferr" hidden></p></div>
    <div class="ff"><label for="is-res">What was done <span class="opt">optional</span></label><textarea id="is-res" placeholder="e.g. Replaced bearing cup with Turner delrin cup">${esc(x.resolution||"")}</textarea><p class="ferr" hidden></p></div>
   </div>
   <div class="formerr" id="is-err" hidden></div>
   <div class="dr-actions"><button class="btn primary" type="submit" id="is-go">${has?"Save changes":"Add issue"}</button><button class="btn" type="button" data-act="close">Cancel</button>${has?`<button class="btn danger" type="button" id="is-del" style="margin-left:auto">Delete issue</button>`:""}</div>
   <div id="is-confirm"></div></form>`,()=>{
   const f=$("#f-is");const ok=bindValidation(f,{"is-t":v=>v.trim()?"":"Describe the issue in a few words."});
-  $("#is-done").addEventListener("change",e=>{$("#is-done-f").hidden=!e.target.checked});
+  f.addEventListener("change",()=>{$("#is-done-f").hidden=f.querySelector("[name=is-p]:checked").value!=="done"});
   f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;const b=$("#is-go");b.disabled=true;b.textContent="Saving…";
-   const done=$("#is-done").checked;
-   const row={title:$("#is-t").value.trim(),priority:f.querySelector("[name=is-p]:checked").value,source:$("#is-src").value.trim()||null,notes:$("#is-n").value.trim()||null,resolved:done,resolved_on:done?($("#is-on").value||today()):null,resolution:done?($("#is-res").value.trim()||null):null};
+   const st=f.querySelector("[name=is-p]:checked").value,done=st==="done";
+   const row={title:$("#is-t").value.trim(),priority:done?(x.p||"warn"):st,source:$("#is-src").value.trim()||null,notes:$("#is-n").value.trim()||null,resolved:done,resolved_on:done?($("#is-on").value||today()):null,resolution:done?($("#is-res").value.trim()||null):null};
    if(!has)row.sort=ISS.length?Math.max(...ISS.map(z=>z.sort||0))+1:0;
    const r=has?await db.from("issues").update(row).eq("id",x.id).select():await db.from("issues").insert(row).select();
    if(!r.error&&!r.data.length)r.error={message:"permission denied"};
    if(r.error){b.disabled=false;b.textContent=has?"Save changes":"Add issue";$("#is-err").textContent="Couldn't save. "+friendly(r.error);$("#is-err").hidden=false;return}
-   closeDrawer();toast(has?"Changes saved":"Issue added");loadWork().catch(()=>{});
+   toast(has?"Changes saved":"Issue added");await loadWork().catch(()=>{});if(has)openIssueCase(x.id,true);else closeDrawer();
   });
   if(has)$("#is-del").addEventListener("click",()=>confirmDelete("#is-confirm",`Delete “${x.t}”? Ticking it as done keeps the history; deleting removes it for both of you.`,"Delete issue",async()=>{
    const r=await db.from("issues").delete().eq("id",x.id).select();if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
@@ -1532,7 +1596,7 @@ function openDue(x){
  const has=!!x;x=x||{s:"warn"};
  openDrawer(has?"Edit service item":"Add service item",`<form id="f-du" novalidate>
   <div class="ff"><label for="du-t">Service item</label><input id="du-t" type="text" value="${esc(x.t||"")}" placeholder="e.g. Brake pads (front)" required><p class="ferr" hidden></p></div>
-  <fieldset class="ff"><legend>Status</legend><div class="choice">${[["crit","Overdue"],["warn","Check"],["ok","Done"]].map(([v,l])=>`<label><input type="radio" name="du-s" value="${v}"${x.s===v?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>
+  <fieldset class="ff"><legend>Status</legend><div class="choice">${DSTAT.map(([v,l])=>`<label><input type="radio" name="du-s" value="${v}"${x.s===v?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>
   <div class="ff" id="du-on-f"${x.s==="ok"?"":" hidden"}><label for="du-on">Done on</label><input id="du-on" type="date" value="${x.done_on||today()}"><p class="ferr" hidden></p></div>
   <div class="ff"><label for="du-last">Last documented <span class="opt">optional</span></label><input id="du-last" type="text" value="${esc(x.last||"")}" placeholder="e.g. Oct 2026, ASR Performance"><p class="ferr" hidden></p></div>
   <div class="ff"><label for="du-n">Notes <span class="opt">optional</span></label><textarea id="du-n" placeholder="Why it matters, parts, fluid spec">${esc(x.n||"")}</textarea><p class="ferr" hidden></p></div>
@@ -1548,13 +1612,112 @@ function openDue(x){
    const r=has?await db.from("service_items").update(row).eq("id",x.id).select():await db.from("service_items").insert(row).select();
    if(!r.error&&!r.data.length)r.error={message:"permission denied"};
    if(r.error){b.disabled=false;b.textContent=has?"Save changes":"Add service item";$("#du-err").textContent="Couldn't save. "+friendly(r.error);$("#du-err").hidden=false;return}
-   closeDrawer();toast(has?"Changes saved":"Service item added");loadWork().catch(()=>{});
+   toast(has?"Changes saved":"Service item added");await loadWork().catch(()=>{});if(has)openDueCase(x.id,true);else closeDrawer();
   });
   if(has)$("#du-del").addEventListener("click",()=>confirmDelete("#du-confirm",`Delete “${x.t}” from the service list?`,"Delete item",async()=>{
    const r=await db.from("service_items").delete().eq("id",x.id).select();if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
    closeDrawer();toast("Service item deleted");loadWork().catch(()=>{})}));
  });
 }
+
+
+/* ---------- case view: open an issue or service item ---------- */
+const ISTAT=[["crit","Urgent"],["warn","Soon"],["info","Low"],["done","Completed"]];
+const DSTAT=[["crit","Overdue"],["warn","Check"],["ok","Completed"]];
+const changed=x=>x.upd_at?`Last changed${x.upd_by?" by "+esc(who(x.upd_by)):""} · ${tShort(x.upd_at)}`:"";
+function statusPicker(name,opts,cur,label){
+ return `<fieldset class="ff ed-only"><legend>${label}</legend><div class="choice">${opts.map(([v,l])=>`<label><input type="radio" name="${name}" value="${v}"${v===cur?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>`;
+}
+function caseShell(id,kind,inner){return `<div class="case" data-case="${kind}:${id}">${inner}<div class="formerr" id="cs-err" hidden></div><div id="cs-confirm"></div></div>`}
+
+function issueCaseHTML(x){
+ const cur=x.resolved?"done":x.p;
+ return caseShell(x.id,"issue",`
+  <div class="case-head"><span class="pill ${x.resolved?"p-ok":PL[x.p][1]}">${x.resolved?"Completed":PL[x.p][0]}</span><h3>${esc(x.t)}</h3></div>
+  ${statusPicker("cs",ISTAT,cur,"Status")}
+  <div id="cs-done" class="ed-only"${cur==="done"?"":" hidden"}>
+   <div class="ff"><label for="cs-on">Completed on</label><input id="cs-on" type="date" value="${x.resolved_on||today()}"><p class="ferr" hidden></p></div>
+   <div class="ff"><label for="cs-res">What was done <span class="opt">optional</span></label><textarea id="cs-res" placeholder="e.g. Replaced with Turner delrin bearing cup">${esc(x.resolution||"")}</textarea><p class="ferr" hidden></p></div>
+   <div class="dr-actions" style="margin-bottom:16px"><button class="btn primary" type="button" id="cs-complete">${x.resolved?"Save completion details":"Mark completed"}</button>${x.resolved?"":`<button class="btn" type="button" id="cs-undo">Keep it open</button>`}</div>
+  </div>
+  <dl class="case-dl">
+   ${x.resolved?`<div><dt>Completed</dt><dd>${x.resolved_on?dShort(x.resolved_on):"—"}${x.resolution?`<p class="pre">${esc(x.resolution)}</p>`:""}</dd></div>`:""}
+   <div><dt>Source</dt><dd>${esc(x.src||"—")}</dd></div>
+   <div><dt>Notes</dt><dd>${x.n?`<p class="pre">${esc(x.n)}</p>`:`<span class="muted">No notes yet.</span>`}</dd></div>
+  </dl>
+  <p class="case-meta">${changed(x)}</p>
+  <div class="dr-actions ed-only"><button class="btn" type="button" id="cs-edit">${svgI("pencil")}Edit details</button><button class="btn danger" type="button" id="cs-del" style="margin-left:auto">Delete issue</button></div>`);
+}
+function dueCaseHTML(x){
+ return caseShell(x.id,"due",`
+  <div class="case-head"><span class="pill ${DL[x.s][1]}">${x.s==="ok"?"Completed":DL[x.s][0]}</span><h3>${esc(x.t)}</h3></div>
+  ${statusPicker("cs",DSTAT,x.s,"Status")}
+  <div id="cs-done" class="ed-only"${x.s==="ok"?"":" hidden"}>
+   <div class="ff"><label for="cs-on">Completed on</label><input id="cs-on" type="date" value="${x.done_on||today()}"><p class="ferr" hidden></p></div>
+   <div class="ff"><label for="cs-last">Done where / how <span class="opt">optional</span></label><input id="cs-last" type="text" value="${esc(x.s==="ok"?(x.last||""):"")}" placeholder="e.g. ASR Performance, Motul 75W-90"><p class="ferr" hidden></p></div>
+   <div class="dr-actions" style="margin-bottom:16px"><button class="btn primary" type="button" id="cs-complete">${x.s==="ok"?"Save completion details":"Mark completed"}</button>${x.s==="ok"?"":`<button class="btn" type="button" id="cs-undo">Keep it open</button>`}</div>
+  </div>
+  <dl class="case-dl">
+   ${x.s==="ok"?`<div><dt>Completed</dt><dd>${x.done_on?dShort(x.done_on):"—"}</dd></div>`:""}
+   <div><dt>Last documented</dt><dd>${esc(x.last||"—")}</dd></div>
+   <div><dt>Notes</dt><dd>${x.n?`<p class="pre">${esc(x.n)}</p>`:`<span class="muted">No notes yet.</span>`}</dd></div>
+  </dl>
+  <p class="case-meta">${changed(x)}</p>
+  <div class="dr-actions ed-only"><button class="btn" type="button" id="cs-edit">${svgI("pencil")}Edit details</button><button class="btn danger" type="button" id="cs-del" style="margin-left:auto">Delete item</button></div>`);
+}
+async function caseSave(table,id,row){
+ const r=await db.from(table).update(row).eq("id",id).select();
+ if(r.error||!r.data.length){const e=$("#cs-err");if(e){e.textContent="Couldn't save. "+friendly(r.error||{message:"permission denied"});e.hidden=false}return false}
+ await loadWork().catch(()=>{});return true;
+}
+function openIssueCase(id,fresh){
+ const x=ISS.find(z=>(z.id||z.key)===id);if(!x)return;
+ if(fresh&&!$("#drawer").hidden){$("#dr-title").textContent="Issue";$("#dr-body").innerHTML=issueCaseHTML(x)}else openDrawer("Issue",issueCaseHTML(x));
+ const body=$("#dr-body");
+ body.querySelectorAll("[name=cs]").forEach(r=>r.addEventListener("change",async()=>{
+  const v=r.value;
+  if(v==="done"){$("#cs-done").hidden=false;$("#cs-res").focus();return}
+  $("#cs-done").hidden=true;const wasDone=x.resolved;
+  if(await caseSave("issues",x.id,{priority:v,resolved:false,resolved_on:null}))
+   {toast(wasDone?"Reopened as "+PL[v][0].toLowerCase():"Marked "+PL[v][0].toLowerCase());openIssueCase(id,true)}
+ }));
+ const undo=$("#cs-undo");if(undo)undo.addEventListener("click",()=>{$("#cs-done").hidden=true;body.querySelector(`[name=cs][value="${x.p}"]`).checked=true});
+ $("#cs-complete").addEventListener("click",async e=>{e.target.disabled=true;e.target.textContent="Saving…";
+  const was=x.resolved;
+  if(await caseSave("issues",x.id,{resolved:true,resolved_on:$("#cs-on").value||today(),resolution:$("#cs-res").value.trim()||null})){toast(was?"Saved":"Marked completed");openIssueCase(id,true)}
+  else{e.target.disabled=false;e.target.textContent=was?"Save completion details":"Mark completed"}});
+ $("#cs-edit").addEventListener("click",()=>openIssue(x));
+ $("#cs-del").addEventListener("click",()=>confirmDelete("#cs-confirm",`Delete “${x.t}”? Marking it completed keeps the history; deleting removes it for both of you.`,"Delete issue",async()=>{
+  const r=await db.from("issues").delete().eq("id",x.id).select();if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
+  closeDrawer();toast("Issue deleted");loadWork().catch(()=>{})}));
+}
+function openDueCase(id,fresh){
+ const x=SVC.find(z=>(z.id||z.key)===id);if(!x)return;
+ if(fresh&&!$("#drawer").hidden){$("#dr-title").textContent="Service item";$("#dr-body").innerHTML=dueCaseHTML(x)}else openDrawer("Service item",dueCaseHTML(x));
+ const body=$("#dr-body");
+ body.querySelectorAll("[name=cs]").forEach(r=>r.addEventListener("change",async()=>{
+  const v=r.value;
+  if(v==="ok"){$("#cs-done").hidden=false;$("#cs-on").focus();return}
+  $("#cs-done").hidden=true;const wasDone=x.s==="ok";
+  if(await caseSave("service_items",x.id,{status:v,prev_status:null,done_on:null}))
+   {toast(wasDone?"Moved back to "+DL[v][0].toLowerCase():"Marked "+(v==="crit"?"overdue":"check"));openDueCase(id,true)}
+ }));
+ const undo=$("#cs-undo");if(undo)undo.addEventListener("click",()=>{$("#cs-done").hidden=true;body.querySelector(`[name=cs][value="${x.s}"]`).checked=true});
+ $("#cs-complete").addEventListener("click",async e=>{e.target.disabled=true;e.target.textContent="Saving…";
+  const was=x.s==="ok";const row={status:"ok",done_on:$("#cs-on").value||today(),prev_status:was?(x.prev||null):x.s};
+  const how=$("#cs-last").value.trim();if(how)row.last_done=how;
+  if(await caseSave("service_items",x.id,row)){toast(was?"Saved":"Marked completed");openDueCase(id,true)}
+  else{e.target.disabled=false;e.target.textContent=was?"Save completion details":"Mark completed"}});
+ $("#cs-edit").addEventListener("click",()=>openDue(x));
+ $("#cs-del").addEventListener("click",()=>confirmDelete("#cs-confirm",`Delete “${x.t}” from the service list?`,"Delete item",async()=>{
+  const r=await db.from("service_items").delete().eq("id",x.id).select();if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
+  closeDrawer();toast("Service item deleted");loadWork().catch(()=>{})}));
+}
+document.addEventListener("click",e=>{
+ if(e.target.closest(".tick"))return;
+ const oi=e.target.closest("[data-open-issue]");if(oi){openIssueCase(oi.dataset.openIssue);return}
+ const od=e.target.closest("[data-open-due]");if(od){openDueCase(od.dataset.openDue);return}
+});
 
 /* notes: compose, inline edit, delete */
 $("#note-form").addEventListener("submit",async e=>{e.preventDefault();
@@ -1591,8 +1754,6 @@ document.addEventListener("click",e=>{
    if(r.error||!r.data.length){ev.target.disabled=false;ev.target.textContent="Delete note";const p=c.querySelector(".ferr");p.textContent="Couldn't delete. "+friendly(r.error||{message:"permission denied"});p.hidden=false;return}
    NOTES=NOTES.filter(z=>z.id!==n.id);renderNotes();toast("Note deleted")});
  }
- const ei=e.target.closest("[data-edit-issue]");if(ei){openIssue(ISS.find(z=>z.id===ei.dataset.editIssue));return}
- const eu=e.target.closest("[data-edit-due]");if(eu){openDue(SVC.find(z=>z.id===eu.dataset.editDue));return}
  const a=e.target.closest("[data-act]");if(!a)return;
  if(a.dataset.act==="add-issue")openIssue(null);
  else if(a.dataset.act==="add-due")openDue(null);
