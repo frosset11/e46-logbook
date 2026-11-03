@@ -370,6 +370,42 @@ fieldset.ff{border:0;padding:0}
 .formerr{background:var(--crit-soft);color:var(--crit);border-radius:8px;padding:10px 12px;font-size:14px;margin:0 0 14px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
+/* ---------- tick lists + notes ---------- */
+.rows li{display:flex;gap:12px;align-items:flex-start;grid-template-columns:none}
+.rows .body{flex:1;min-width:0}
+.rows .t .pill{margin-right:6px;vertical-align:1px}
+.rows li.emptyrow{color:var(--muted);justify-content:center;padding:20px 0}
+.tick{flex:none;display:inline-grid;place-items:center;width:44px;height:44px;margin:-10px -6px -10px -10px;cursor:pointer}
+.tick input{appearance:none;-webkit-appearance:none;width:22px;height:22px;margin:0;border:2px solid var(--faint);border-radius:6px;background:var(--surface);display:grid;place-items:center;cursor:pointer;transition:background-color .15s,border-color .15s}
+.tick input:hover{border-color:var(--fern)}
+.tick input:checked{background:var(--fern);border-color:var(--fern)}
+.tick input:checked::after{content:"";width:6px;height:11px;border:solid var(--fern-ink);border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+.tick input:focus-visible{outline:2px solid var(--fern);outline-offset:2px}
+.tick-ro{flex:none;width:20px;height:20px;color:var(--ok);margin-top:2px}
+.tick-ro svg{width:18px;height:18px}
+body.can-edit .tick-ro{display:none}
+body.can-edit .ro-only{display:none!important}
+.is-done .t,.is-done .nbody{color:var(--muted)}
+.is-done .t{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--muted) 60%,transparent)}
+.res{display:flex;gap:6px;align-items:flex-start;color:var(--ok);font-size:13.5px;font-weight:600;margin:3px 0 1px}
+.res svg{flex:none;width:15px;height:15px;margin-top:2px}
+.checkrow{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600;font-size:14.5px;margin:-4px 0 10px;cursor:pointer}
+.checkrow input{width:20px;height:20px;accent-color:var(--fern)}
+.compose label{display:block;font-weight:600;font-size:13.5px;margin-bottom:5px}
+.compose textarea,.note-edit{font:inherit;font-size:16px;width:100%;min-height:84px;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.compose textarea:focus,.note-edit:focus{border-color:var(--fern);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--fern) 20%,transparent)}
+.compose .dr-actions{justify-content:space-between;margin-top:8px}
+.compose .hint{font-size:12.5px;color:var(--muted)}
+.notes{list-style:none;margin:0;padding:0}
+.notes li.note{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.notes .body{flex:1;min-width:0}
+.nbody{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}
+.notes .src{color:var(--muted);font-size:12.5px;margin-top:3px}
+.nact{display:flex;gap:2px;margin:-6px -6px 0 0}
+.notes li.emptyrow{list-style:none;color:var(--muted);text-align:center;padding:24px 0;border-top:1px solid var(--line)}
+.confirm.inrow{flex-basis:100%;margin-top:4px}
+.signin-hint{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.signin-hint p{margin:0;color:var(--muted)}
 </style>
 
 <div class="app">
@@ -510,17 +546,34 @@ fieldset.ff{border:0;padding:0}
     <div class="card">
       <div class="cardhead">
         <div><h2>Known issues</h2><p class="lede">From the listing, the seller's comments and what you've noticed driving it. Most urgent first.</p></div>
-        <div class="seg" id="iss-seg" role="group" aria-label="Filter issues by priority"></div>
+        <div class="editbar-actions"><div class="seg" id="iss-seg" role="group" aria-label="Filter issues"></div><button class="btn ed-only" type="button" data-act="add-issue"><svg-i name="plus"></svg-i>Add issue</button></div>
       </div>
       <ul class="rows" id="iss-list"></ul>
     </div>
     <div class="card" style="margin-top:16px">
       <div class="cardhead">
         <div><h2>Baseline service</h2><p class="lede">When each item was last done according to the records. Where there is no record, assume it is due.</p></div>
-        <div class="seg" id="due-seg" role="group" aria-label="Filter service items by status"></div>
+        <div class="editbar-actions"><div class="seg" id="due-seg" role="group" aria-label="Filter service items by status"></div><button class="btn ed-only" type="button" data-act="add-due"><svg-i name="plus"></svg-i>Add service item</button></div>
       </div>
       <div class="prog" style="margin-top:0"><span id="due-prog-l">–</span><div class="bar" role="progressbar" aria-label="Baseline service done" id="due-bar"><i></i></div></div>
       <ul class="rows" id="due-list"></ul>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="panel" id="notes" aria-labelledby="sectitle" hidden>
+    <div class="card ed-only compose" style="margin-bottom:16px">
+      <form id="note-form" novalidate>
+        <label for="note-new">New note</label>
+        <textarea id="note-new" placeholder="e.g. Order Motul RBF600 before the first DE. Ask ASR about the diff fluid."></textarea>
+        <p class="ferr" id="note-err" hidden></p>
+        <div class="dr-actions"><span class="hint">Ctrl/⌘ + Enter adds it</span><button class="btn primary" type="submit" id="note-go">Add note</button></div>
+      </form>
+    </div>
+    <div class="card ro-only signin-hint" style="margin-bottom:16px"><p>Sign in as Felipe or Bugsy to add notes and tick them off.</p><button class="btn" type="button" data-act="signin"><svg-i name="login"></svg-i>Sign in to edit</button></div>
+    <div class="card">
+      <div class="cardhead"><div><h2>Notes</h2><p class="lede">Newest first. Done notes move to the Done tab.</p></div><div class="seg" id="notes-seg" role="group" aria-label="Filter notes"></div></div>
+      <ul class="notes" id="note-list"></ul>
     </div>
   </section>
 
@@ -619,6 +672,9 @@ const ICON={
  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
  up:'<path d="m18 15-6-6-6 6"/>',
  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+ note:'<path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/>',
+ trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>',
  pencil:'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
  login:'<path d="m10 17 5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>',
  refresh:'<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>'
@@ -630,7 +686,8 @@ const SECTIONS=[
  {id:"overview",g:"Car",label:"Overview",icon:"dash",desc:""},
  {id:"carmap",g:"Car",label:"Car map",icon:"car",desc:"Every record placed on the part of the car it touched."},
  {id:"build",g:"Car",label:"Build sheet",icon:"list",desc:"Equipment the seller listed on Cars & Bids, checked against the invoices."},
- {id:"todo",g:"Work",label:"Issues & service",icon:"wrench",desc:"Known problems and the baseline service to do before the first track day."},
+ {id:"todo",g:"Work",label:"Issues & service",icon:"wrench",desc:"Known problems and the baseline service to do before the first track day. Tick items off as they get done."},
+ {id:"notes",g:"Work",label:"Notes",icon:"note",desc:"Reminders and notes for the car. Tick them off when they're done."},
  {id:"ledger",g:"Money",label:"Ledger",icon:"wallet",desc:"Shared costs and income since the purchase on 1 Oct 2026, split 50/50."},
  {id:"upgrades",g:"Money",label:"Upgrades",icon:"trend",desc:"Every mod with its full cost, built from the ledger."},
  {id:"sold",g:"Money",label:"Sold items",icon:"tag",desc:"Parts sold off the car and how the money splits."},
@@ -936,32 +993,65 @@ const EVL={yes:["Invoice","ev yes"],part:["Partly on invoice","ev"],no:["Seller 
 $("#buildsheet").innerHTML=BUILD.map(g=>`<div class="card"><h3>${g.h}</h3><ul>${g.items.map(i=>`<li><span>${esc(i[0])}</span><span class="${EVL[i[1]][1]}">${EVL[i[1]][0]}</span></li>`).join("")}</ul></div>`).join("");
 $("#extras").innerHTML=EXTRAS.map(e=>`<li>${esc(e)}</li>`).join("");
 
-/* issues + due */
+/* issues + service + notes (live, tickable) */
 const PL={crit:["Urgent","p-crit"],warn:["Soon","p-warn"],info:["Low","p-info"],ok:["OK","p-ok"]};
 const DL={crit:["Overdue / unknown","p-crit"],warn:["Check","p-warn"],ok:["Done","p-ok"]};
 const RANK={crit:0,warn:1,info:2,ok:3};
-const openCrit=ISSUES.filter(i=>i[3]==="crit").length+DUE.filter(d=>d[2]==="crit").length;
-const dueOk=DUE.filter(d=>d[2]==="ok").length;
-function segment(el,opts,onPick){
- let cur=opts[0].v;
- const draw=()=>{el.innerHTML=opts.map(o=>`<button type="button" aria-pressed="${o.v===cur}" data-v="${o.v}">${o.l}<b>${o.n}</b></button>`).join("")};
- el.addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;cur=b.dataset.v;draw();onPick(cur)});
- draw();onPick(cur);
+let ISS=ISSUES.map((i,k)=>({t:i[0],src:i[1],n:i[2],p:i[3],resolved:false,sort:k}));
+let SVC=DUE.map((d,k)=>({t:d[0],last:d[1],s:d[2],n:d[3],sort:k,done_on:null}));
+let NOTES=[];
+const openCrit=()=>ISS.filter(i=>!i.resolved&&i.p==="crit").length+SVC.filter(d=>d.s==="crit").length;
+const dueOk=()=>SVC.filter(d=>d.s==="ok").length;
+const NAMES={"fr@tf.com.br":"Felipe","ginsburgbugsy@gmail.com":"Bugsy"};
+const who=e=>e?(NAMES[e.toLowerCase()]||e):"";
+const dShort=iso=>{if(!iso)return"";const d=new Date(iso.length<=10?iso+"T12:00:00":iso);return d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear()};
+const tShort=iso=>{const d=new Date(iso);return d.getDate()+" "+MON[d.getMonth()]+", "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
+const tick=(attr,id,on,label)=>`<label class="tick ed-only" title="${on?"Mark as not done":"Mark as done"}"><input type="checkbox" ${attr}="${id}"${on?" checked":""}${id?"":" disabled"}><span class="sr">${esc(label)}</span></label>`;
+const FILT={iss:"open",due:"all",notes:"open"};
+function segment(el,key,opts){
+ el.innerHTML=opts.map(o=>`<button type="button" aria-pressed="${o.v===FILT[key]}" data-seg="${key}" data-v="${o.v}">${o.l}<b>${o.n}</b></button>`).join("");
 }
-(function(){
- const list=ISSUES.map(i=>({t:i[0],src:i[1],n:i[2],p:i[3]})).sort((a,b)=>RANK[a.p]-RANK[b.p]);
- const cnt=p=>list.filter(x=>x.p===p).length;
- segment($("#iss-seg"),[{v:"all",l:"All",n:list.length},{v:"crit",l:"Urgent",n:cnt("crit")},{v:"warn",l:"Soon",n:cnt("warn")},{v:"info",l:"Low",n:cnt("info")}],v=>{
-  $("#iss-list").innerHTML=list.filter(x=>v==="all"||x.p===v).map(x=>`<li><span class="pill ${PL[x.p][1]}">${PL[x.p][0]}</span><div><div class="t">${esc(x.t)}</div><div class="src">Source: ${esc(x.src)}</div><div class="n">${esc(x.n)}</div></div></li>`).join("");
- });
- const due=DUE.map(d=>({t:d[0],last:d[1],s:d[2],n:d[3]})).sort((a,b)=>RANK[a.s]-RANK[b.s]);
+document.addEventListener("click",e=>{const b=e.target.closest("[data-seg]");if(!b)return;FILT[b.dataset.seg]=b.dataset.v;b.dataset.seg==="notes"?renderNotes():renderWork()});
+
+function renderWork(){
+ const iss=ISS.slice().sort((a,b)=>(a.resolved-b.resolved)||(RANK[a.p]-RANK[b.p])||(a.sort-b.sort));
+ const open=iss.filter(x=>!x.resolved),cnt=p=>open.filter(x=>x.p===p).length;
+ segment($("#iss-seg"),"iss",[{v:"open",l:"Open",n:open.length},{v:"crit",l:"Urgent",n:cnt("crit")},{v:"warn",l:"Soon",n:cnt("warn")},{v:"info",l:"Low",n:cnt("info")},{v:"done",l:"Done",n:iss.length-open.length}]);
+ const f=FILT.iss,list=iss.filter(x=>f==="done"?x.resolved:(!x.resolved&&(f==="open"||x.p===f)));
+ $("#iss-list").innerHTML=list.map(x=>`<li class="${x.resolved?"is-done":""}">${tick("data-tick-issue",x.id,x.resolved,"Mark “"+x.t+"” as done")}
+  <div class="body"><div class="t"><span class="pill ${x.resolved?"p-ok":PL[x.p][1]}">${x.resolved?"Done":PL[x.p][0]}</span> ${esc(x.t)}</div>
+  ${x.resolved?`<div class="res">${svgI("check")}Done${x.resolved_on?" "+dShort(x.resolved_on):""}${x.resolution?": "+esc(x.resolution):""}</div>`:""}
+  <div class="src">Source: ${esc(x.src||"—")}</div>${x.n?`<div class="n">${esc(x.n)}</div>`:""}</div>
+  ${x.id?`<button class="ibtn ed-only" type="button" data-edit-issue="${x.id}" aria-label="Edit ${esc(x.t)}" title="Edit">${svgI("pencil")}</button>`:"<span></span>"}</li>`).join("")
+  ||`<li class="emptyrow">${f==="done"?"Nothing ticked off yet.":"No open issues in this group."}</li>`;
+
+ const due=SVC.slice().sort((a,b)=>(RANK[a.s]-RANK[b.s])||(a.sort-b.sort));
  const dc=s=>due.filter(x=>x.s===s).length;
- segment($("#due-seg"),[{v:"all",l:"All",n:due.length},{v:"crit",l:"Overdue",n:dc("crit")},{v:"warn",l:"Check",n:dc("warn")},{v:"ok",l:"Done",n:dc("ok")}],v=>{
-  $("#due-list").innerHTML=due.filter(x=>v==="all"||x.s===v).map(x=>`<li><span class="pill ${DL[x.s][1]}">${DL[x.s][0]}</span><div><div class="t">${esc(x.t)}</div><div class="src">Last documented: ${esc(x.last)}</div><div class="n">${esc(x.n)}</div></div></li>`).join("");
- });
- const pct=Math.round(dueOk/DUE.length*100);
- ["#due","#rd"].forEach(p=>{$(p+"-prog-l").textContent=`${dueOk} of ${DUE.length} baseline items done`;const b=$(p+"-bar");b.setAttribute("aria-valuenow",pct);b.setAttribute("aria-valuemin",0);b.setAttribute("aria-valuemax",100);b.querySelector("i").style.width=pct+"%"});
-})();
+ segment($("#due-seg"),"due",[{v:"all",l:"All",n:due.length},{v:"crit",l:"Overdue",n:dc("crit")},{v:"warn",l:"Check",n:dc("warn")},{v:"ok",l:"Done",n:dc("ok")}]);
+ $("#due-list").innerHTML=due.filter(x=>FILT.due==="all"||x.s===FILT.due).map(x=>`<li class="${x.s==="ok"?"is-done":""}">${tick("data-tick-due",x.id,x.s==="ok","Mark “"+x.t+"” as done")}
+  <div class="body"><div class="t"><span class="pill ${DL[x.s][1]}">${DL[x.s][0]}</span> ${esc(x.t)}</div>
+  <div class="src">${x.s==="ok"&&x.done_on?"Done "+dShort(x.done_on):"Last documented: "+esc(x.last||"—")}</div>${x.n?`<div class="n">${esc(x.n)}</div>`:""}</div>
+  ${x.id?`<button class="ibtn ed-only" type="button" data-edit-due="${x.id}" aria-label="Edit ${esc(x.t)}" title="Edit">${svgI("pencil")}</button>`:"<span></span>"}</li>`).join("")
+  ||`<li class="emptyrow">Nothing in this group.</li>`;
+ const ok=dueOk(),pct=due.length?Math.round(ok/due.length*100):0;
+ ["#due","#rd"].forEach(p=>{$(p+"-prog-l").textContent=`${ok} of ${due.length} baseline items done`;const b=$(p+"-bar");b.setAttribute("aria-valuenow",pct);b.setAttribute("aria-valuemin",0);b.setAttribute("aria-valuemax",100);b.querySelector("i").style.width=pct+"%"});
+ if(window.renderOverviewMoney&&window.LS)renderOverviewMoney();
+ if(window.updateCounts)updateCounts();
+}
+renderWork();
+
+function renderNotes(){
+ const all=NOTES.slice().sort((a,b)=>(a.done-b.done)||(a.done?(b.done_at||"").localeCompare(a.done_at||""):b.created_at.localeCompare(a.created_at)));
+ const open=all.filter(n=>!n.done).length;
+ segment($("#notes-seg"),"notes",[{v:"open",l:"To do",n:open},{v:"done",l:"Done",n:all.length-open},{v:"all",l:"All",n:all.length}]);
+ const list=all.filter(n=>FILT.notes==="all"||(FILT.notes==="done"?n.done:!n.done));
+ $("#note-list").innerHTML=list.map(n=>`<li class="note${n.done?" is-done":""}" data-note="${n.id}">${tick("data-tick-note",n.id,n.done,"Mark note as done")}
+  <span class="tick-ro" aria-hidden="true">${n.done?svgI("check"):""}</span>
+  <div class="body"><p class="nbody">${esc(n.body)}</p><div class="src">${esc(who(n.created_by)||"Added")} · ${tShort(n.created_at)}${n.done&&n.done_at?" · done "+dShort(n.done_at):""}</div></div>
+  <div class="nact ed-only"><button class="ibtn" type="button" data-edit-note="${n.id}" aria-label="Edit note" title="Edit">${svgI("pencil")}</button><button class="ibtn" type="button" data-del-note="${n.id}" aria-label="Delete note" title="Delete">${svgI("trash")}</button></div></li>`).join("")
+  ||`<li class="emptyrow">${!live.ok?"Notes load from the live site. Open e46-logbook.vercel.app to see them.":FILT.notes==="done"?"Nothing ticked off yet.":"No open notes. Add a reminder above."}</li>`;
+ if(window.updateCounts)updateCounts();
+}
 
 /* ledger */
 function renderLedger(){
@@ -1086,13 +1176,13 @@ $("#tbl-sources tbody").innerHTML=SOURCES.map(s=>`<tr><td>${esc(s[0])}</td><td>$
 /* overview: tiles, readiness, latest, history summary */
 function renderOverviewMoney(){
  const {tot,bal}=LS;
- $("#t-urgent").textContent=openCrit;
- $("#t-urgent-s").textContent=`${ISSUES.length} open issues · ${DUE.length-dueOk} service items`;
+ $("#t-urgent").textContent=openCrit();
+ $("#t-urgent-s").textContent=`${ISS.filter(i=>!i.resolved).length} open issues · ${SVC.length-dueOk()} service items`;
  $("#t-bal").textContent=Math.abs(bal)<0.005?"Even":fmt(c2(Math.abs(bal)));
  $("#t-bal-s").textContent=Math.abs(bal)<0.005?"nothing owed":(bal>0?"Bugsy owes Felipe":"Felipe owes Bugsy");
  $("#t-inv").textContent=fmt0(tot);
  $("#t-inv-s").textContent=`${fmt0(tot/2)} each · purchase + parts − sales`;
- const urgent=[...ISSUES.filter(i=>i[3]==="crit").map(i=>[i[0],i[2]]),...DUE.filter(d=>d[2]==="crit").map(d=>[d[0]+": no recent record",d[3]])];
+ const urgent=[...ISS.filter(i=>!i.resolved&&i.p==="crit").map(i=>[i.t,i.n||""]),...SVC.filter(d=>d.s==="crit").map(d=>[d.t+": no recent record",d.n||""])];
  $("#rd-n").textContent=urgent.length;
  $("#rd-n").classList.toggle("ok",urgent.length===0);
  $("#rd-lede").textContent=urgent.length?`urgent item${urgent.length===1?"":"s"} to sort before the car goes on track.`:"Nothing urgent. Check the remaining service items.";
@@ -1109,13 +1199,13 @@ renderOverviewMoney();
 /* navigation: hash routing, back button, shortcuts */
 (function(){
  const ids=SECTIONS.map(s=>s.id);
- const counts={todo:[openCrit,"crit"],timeline:[R.length],ledger:[LEDGER.length],upgrades:[US.mods],sold:[US.sold],sources:[SOURCES.length]};
+ const counts={todo:[openCrit(),"crit"],notes:[NOTES.filter(n=>!n.done).length],timeline:[R.length],ledger:[LEDGER.length],upgrades:[US.mods],sold:[US.sold],sources:[SOURCES.length]};
  let g="",html="";
  SECTIONS.forEach((s,i)=>{if(s.g!==g){g=s.g;html+=`<div class="grp" role="presentation">${g}</div>`}
   const c=counts[s.id];
   html+=`<a href="#${s.id}" data-go="${s.id}" title="${s.label} (${i+1})">${svgI(s.icon)}<span>${s.label}</span>${c?`<span data-count="${s.id}" class="n${c[1]?" "+c[1]:""}"${c[1]?` aria-label="${c[0]} urgent"`:""}>${c[0]}</span>`:""}</a>`});
  $("#nav").innerHTML=html;
- window.updateCounts=()=>{const v={ledger:LEDGER.length,upgrades:US.mods,sold:US.sold};Object.entries(v).forEach(([k,n])=>{const el=document.querySelector(`[data-count="${k}"]`);if(el)el.textContent=n})};
+ window.updateCounts=()=>{const v={ledger:LEDGER.length,upgrades:US.mods,sold:US.sold,todo:openCrit(),notes:NOTES.filter(n=>!n.done).length};Object.entries(v).forEach(([k,n])=>{const el=document.querySelector(`[data-count="${k}"]`);if(el)el.textContent=n})};
  const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
  let current=null;
  function go(id,{push=true,focus=false,scrollTo=null}={}){
@@ -1183,6 +1273,7 @@ async function loadLive(){
   PLANNED=p.data.map(r=>[r.item,r.notes||"",r.est_cost==null?null:+r.est_cost,r.id]);
   live.ok=true;live.state="live";live.syncedAt=new Date();live.err=null;
   renderMoney();
+  await loadWork();
  }catch(e){live.state="error";live.err=e}
  paintSync();
 }
@@ -1257,7 +1348,7 @@ function openSignIn(){
   const f=$("#f-si");const ok=bindValidation(f,{"si-email":v=>!v.trim()?"Enter your email.":(!/^\S+@\S+\.\S+$/.test(v.trim())?"Enter a full email address, like name@example.com.":"")});
   f.addEventListener("submit",async e=>{e.preventDefault();if(!ok())return;
    const email=$("#si-email").value.trim().toLowerCase(),b=$("#si-go");b.disabled=true;b.textContent="Sending…";$("#si-err").hidden=true;
-   try{localStorage.setItem("e46tab","ledger")}catch(_){}
+   try{localStorage.setItem("e46tab",(location.hash.slice(1)||"ledger"))}catch(_){}
    const {error}=await db.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});
    if(error){b.disabled=false;b.textContent="Email me a sign-in link";const m=/rate|429|seconds/i.test(error.message)?"Too many sign-in emails in a short time. Wait a minute, then try again.":friendly(error);$("#si-err").textContent=m;$("#si-err").hidden=false;return}
    $("#dr-body").innerHTML=`<p>Check <b>${esc(email)}</b> for an email from Supabase and open the link <b>on this device</b>. The link works once and expires after an hour.</p><div class="dr-actions"><button class="btn" type="button" data-act="signin">Use a different email</button><button class="btn" type="button" data-act="close">Close</button></div>`;
@@ -1371,7 +1462,143 @@ if(db){
  });
  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&live.ok&&(Date.now()-live.syncedAt)>60000)loadLive()});
 }
-paintSync();loadLive();
+paintSync();
+
+/* ---------- live: issues, service items, notes ---------- */
+async function loadWork(){
+ if(!db)return;
+ const [i,s,n]=await Promise.all([db.from("issues").select("*").order("sort").order("created_at"),db.from("service_items").select("*").order("sort").order("created_at"),db.from("notes").select("*").order("created_at",{ascending:false})]);
+ if(i.error||s.error||n.error)throw(i.error||s.error||n.error);
+ ISS=i.data.map(r=>({id:r.id,t:r.title,src:r.source,n:r.notes,p:r.priority,resolved:r.resolved,resolved_on:r.resolved_on,resolution:r.resolution,sort:r.sort}));
+ SVC=s.data.map(r=>({id:r.id,t:r.item,last:r.last_done,s:r.status,prev:r.prev_status,done_on:r.done_on,n:r.notes,sort:r.sort}));
+ NOTES=n.data;
+ renderWork();renderNotes();
+}
+async function save(table,id,row,revert){
+ const r=await db.from(table).update(row).eq("id",id).select();
+ if(r.error||!r.data.length){revert();toast("Couldn't save. "+friendly(r.error||{message:"permission denied"}));return false}
+ return true;
+}
+/* ticks: update the screen first, then the database */
+document.addEventListener("change",async e=>{
+ const c=e.target;if(!(c instanceof HTMLInputElement)||c.type!=="checkbox")return;
+ if(c.dataset.tickIssue){const x=ISS.find(z=>z.id===c.dataset.tickIssue);if(!x)return;const old={...x};
+  x.resolved=c.checked;x.resolved_on=c.checked?today():null;renderWork();
+  if(await save("issues",x.id,{resolved:x.resolved,resolved_on:x.resolved_on},()=>{Object.assign(x,old);renderWork()}))toast(x.resolved?"Marked as done":"Moved back to open")}
+ else if(c.dataset.tickDue){const x=SVC.find(z=>z.id===c.dataset.tickDue);if(!x)return;const old={...x};
+  if(c.checked){x.prev=x.s==="ok"?null:x.s;x.s="ok";x.done_on=today()}else{x.s=x.prev||"warn";x.prev=null;x.done_on=null}
+  renderWork();
+  if(await save("service_items",x.id,{status:x.s,prev_status:x.prev,done_on:x.done_on},()=>{Object.assign(x,old);renderWork()}))toast(x.s==="ok"?"Marked as done":"Moved back to to-do")}
+ else if(c.dataset.tickNote){const x=NOTES.find(z=>z.id===c.dataset.tickNote);if(!x)return;const old={...x};
+  x.done=c.checked;x.done_at=c.checked?new Date().toISOString():null;renderNotes();
+  if(await save("notes",x.id,{done:x.done,done_at:x.done_at},()=>{Object.assign(x,old);renderNotes()}))toast(x.done?"Ticked off":"Moved back to to-do")}
+});
+
+/* issue form */
+function openIssue(x){
+ const has=!!x;x=x||{p:"warn"};
+ openDrawer(has?"Edit issue":"Add issue",`<form id="f-is" novalidate>
+  <div class="ff"><label for="is-t">Issue</label><input id="is-t" type="text" value="${esc(x.t||"")}" placeholder="e.g. Clutch pedal squeaks" required><p class="ferr" hidden></p></div>
+  <fieldset class="ff"><legend>Priority</legend><div class="choice">${[["crit","Urgent"],["warn","Soon"],["info","Low"]].map(([v,l])=>`<label><input type="radio" name="is-p" value="${v}"${x.p===v?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>
+  <div class="ff"><label for="is-src">Source <span class="opt">optional</span></label><input id="is-src" type="text" value="${esc(x.src||"")}" placeholder="e.g. You, Bugsy, shop name"><p class="ferr" hidden></p></div>
+  <div class="ff"><label for="is-n">Notes <span class="opt">optional</span></label><textarea id="is-n" placeholder="Likely cause, what to check, parts needed">${esc(x.n||"")}</textarea><p class="ferr" hidden></p></div>
+  <label class="checkrow"><input type="checkbox" id="is-done"${x.resolved?" checked":""}> Fixed / done</label>
+  <div id="is-done-f"${x.resolved?"":" hidden"}>
+   <div class="ff"><label for="is-on">Done on</label><input id="is-on" type="date" value="${x.resolved_on||today()}"><p class="ferr" hidden></p></div>
+   <div class="ff"><label for="is-res">What was done <span class="opt">optional</span></label><textarea id="is-res" placeholder="e.g. Replaced bearing cup with Turner delrin cup">${esc(x.resolution||"")}</textarea><p class="ferr" hidden></p></div>
+  </div>
+  <div class="formerr" id="is-err" hidden></div>
+  <div class="dr-actions"><button class="btn primary" type="submit" id="is-go">${has?"Save changes":"Add issue"}</button><button class="btn" type="button" data-act="close">Cancel</button>${has?`<button class="btn danger" type="button" id="is-del" style="margin-left:auto">Delete issue</button>`:""}</div>
+  <div id="is-confirm"></div></form>`,()=>{
+  const f=$("#f-is");const ok=bindValidation(f,{"is-t":v=>v.trim()?"":"Describe the issue in a few words."});
+  $("#is-done").addEventListener("change",e=>{$("#is-done-f").hidden=!e.target.checked});
+  f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;const b=$("#is-go");b.disabled=true;b.textContent="Saving…";
+   const done=$("#is-done").checked;
+   const row={title:$("#is-t").value.trim(),priority:f.querySelector("[name=is-p]:checked").value,source:$("#is-src").value.trim()||null,notes:$("#is-n").value.trim()||null,resolved:done,resolved_on:done?($("#is-on").value||today()):null,resolution:done?($("#is-res").value.trim()||null):null};
+   if(!has)row.sort=ISS.length?Math.max(...ISS.map(z=>z.sort||0))+1:0;
+   const r=has?await db.from("issues").update(row).eq("id",x.id).select():await db.from("issues").insert(row).select();
+   if(!r.error&&!r.data.length)r.error={message:"permission denied"};
+   if(r.error){b.disabled=false;b.textContent=has?"Save changes":"Add issue";$("#is-err").textContent="Couldn't save. "+friendly(r.error);$("#is-err").hidden=false;return}
+   closeDrawer();toast(has?"Changes saved":"Issue added");loadWork().catch(()=>{});
+  });
+  if(has)$("#is-del").addEventListener("click",()=>confirmDelete("#is-confirm",`Delete “${x.t}”? Ticking it as done keeps the history; deleting removes it for both of you.`,"Delete issue",async()=>{
+   const r=await db.from("issues").delete().eq("id",x.id).select();if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
+   closeDrawer();toast("Issue deleted");loadWork().catch(()=>{})}));
+ });
+}
+
+/* service item form */
+function openDue(x){
+ const has=!!x;x=x||{s:"warn"};
+ openDrawer(has?"Edit service item":"Add service item",`<form id="f-du" novalidate>
+  <div class="ff"><label for="du-t">Service item</label><input id="du-t" type="text" value="${esc(x.t||"")}" placeholder="e.g. Brake pads (front)" required><p class="ferr" hidden></p></div>
+  <fieldset class="ff"><legend>Status</legend><div class="choice">${[["crit","Overdue"],["warn","Check"],["ok","Done"]].map(([v,l])=>`<label><input type="radio" name="du-s" value="${v}"${x.s===v?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>
+  <div class="ff" id="du-on-f"${x.s==="ok"?"":" hidden"}><label for="du-on">Done on</label><input id="du-on" type="date" value="${x.done_on||today()}"><p class="ferr" hidden></p></div>
+  <div class="ff"><label for="du-last">Last documented <span class="opt">optional</span></label><input id="du-last" type="text" value="${esc(x.last||"")}" placeholder="e.g. Oct 2026, ASR Performance"><p class="ferr" hidden></p></div>
+  <div class="ff"><label for="du-n">Notes <span class="opt">optional</span></label><textarea id="du-n" placeholder="Why it matters, parts, fluid spec">${esc(x.n||"")}</textarea><p class="ferr" hidden></p></div>
+  <div class="formerr" id="du-err" hidden></div>
+  <div class="dr-actions"><button class="btn primary" type="submit" id="du-go">${has?"Save changes":"Add service item"}</button><button class="btn" type="button" data-act="close">Cancel</button>${has?`<button class="btn danger" type="button" id="du-del" style="margin-left:auto">Delete item</button>`:""}</div>
+  <div id="du-confirm"></div></form>`,()=>{
+  const f=$("#f-du");const ok=bindValidation(f,{"du-t":v=>v.trim()?"":"Name the service item."});
+  f.addEventListener("change",()=>{$("#du-on-f").hidden=f.querySelector("[name=du-s]:checked").value!=="ok"});
+  f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;const b=$("#du-go");b.disabled=true;b.textContent="Saving…";
+   const s=f.querySelector("[name=du-s]:checked").value;
+   const row={item:$("#du-t").value.trim(),status:s,done_on:s==="ok"?($("#du-on").value||today()):null,prev_status:s==="ok"?(x.s&&x.s!=="ok"?x.s:(x.prev||null)):null,last_done:$("#du-last").value.trim()||null,notes:$("#du-n").value.trim()||null};
+   if(!has)row.sort=SVC.length?Math.max(...SVC.map(z=>z.sort||0))+1:0;
+   const r=has?await db.from("service_items").update(row).eq("id",x.id).select():await db.from("service_items").insert(row).select();
+   if(!r.error&&!r.data.length)r.error={message:"permission denied"};
+   if(r.error){b.disabled=false;b.textContent=has?"Save changes":"Add service item";$("#du-err").textContent="Couldn't save. "+friendly(r.error);$("#du-err").hidden=false;return}
+   closeDrawer();toast(has?"Changes saved":"Service item added");loadWork().catch(()=>{});
+  });
+  if(has)$("#du-del").addEventListener("click",()=>confirmDelete("#du-confirm",`Delete “${x.t}” from the service list?`,"Delete item",async()=>{
+   const r=await db.from("service_items").delete().eq("id",x.id).select();if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
+   closeDrawer();toast("Service item deleted");loadWork().catch(()=>{})}));
+ });
+}
+
+/* notes: compose, inline edit, delete */
+$("#note-form").addEventListener("submit",async e=>{e.preventDefault();
+ const ta=$("#note-new"),err=$("#note-err"),b=$("#note-go"),body=ta.value.trim();
+ if(!body){err.textContent="Write something before adding the note.";err.hidden=false;ta.setAttribute("aria-invalid","true");ta.focus();return}
+ b.disabled=true;b.textContent="Adding…";
+ const r=await db.from("notes").insert({body}).select();
+ b.disabled=false;b.textContent="Add note";
+ if(r.error||!r.data.length){err.textContent="Couldn't add the note. "+friendly(r.error||{message:"permission denied"})+" Your text is still here.";err.hidden=false;return}
+ ta.value="";err.hidden=true;NOTES.unshift(r.data[0]);FILT.notes="open";renderNotes();toast("Note added");
+});
+$("#note-new").addEventListener("input",e=>{if(e.target.value.trim()){$("#note-err").hidden=true;e.target.setAttribute("aria-invalid","false")}});
+$("#note-new").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();$("#note-form").requestSubmit()}});
+document.addEventListener("click",e=>{
+ const ed=e.target.closest("[data-edit-note]"),dl=e.target.closest("[data-del-note]");
+ if(ed){const n=NOTES.find(z=>z.id===ed.dataset.editNote);const li=ed.closest("li");if(!n||!li)return;
+  const box=li.querySelector(".body");box.innerHTML=`<label class="sr" for="ne-${n.id}">Edit note</label><textarea class="note-edit" id="ne-${n.id}">${esc(n.body)}</textarea><p class="ferr" hidden></p><div class="dr-actions"><button class="btn primary" type="button" data-note-save>Save</button><button class="btn" type="button" data-note-cancel>Cancel</button></div>`;
+  li.querySelector(".nact").hidden=true;const ta=box.querySelector("textarea");ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+  const cancel=()=>renderNotes();
+  ta.addEventListener("keydown",k=>{if(k.key==="Escape"){k.stopPropagation();cancel()}if(k.key==="Enter"&&(k.metaKey||k.ctrlKey)){k.preventDefault();box.querySelector("[data-note-save]").click()}});
+  box.querySelector("[data-note-cancel]").addEventListener("click",cancel);
+  box.querySelector("[data-note-save]").addEventListener("click",async ev=>{const body=ta.value.trim(),p=box.querySelector(".ferr");
+   if(!body){p.textContent="A note can't be empty. Delete it instead if it's no longer needed.";p.hidden=false;return}
+   ev.target.disabled=true;ev.target.textContent="Saving…";const old=n.body;n.body=body;
+   if(await save("notes",n.id,{body},()=>{n.body=old})){renderNotes();toast("Note saved")}else{ev.target.disabled=false;ev.target.textContent="Save"}});
+  return}
+ if(dl){const n=NOTES.find(z=>z.id===dl.dataset.delNote);const li=dl.closest("li");if(!n||!li)return;
+  let c=li.querySelector(".confirm");if(c){c.remove();return}
+  li.insertAdjacentHTML("beforeend",`<div class="confirm inrow" role="alertdialog" aria-label="Delete note"><p style="margin:0 0 8px">Delete this note for both of you? Tick it as done instead to keep it.</p><p class="ferr" hidden></p><div class="dr-actions"><button class="btn danger" type="button" data-yes>Delete note</button><button class="btn" type="button" data-no>Keep it</button></div></div>`);
+  c=li.querySelector(".confirm");c.querySelector("[data-no]").focus();
+  c.querySelector("[data-no]").addEventListener("click",()=>c.remove());
+  c.querySelector("[data-yes]").addEventListener("click",async ev=>{ev.target.disabled=true;ev.target.textContent="Deleting…";
+   const r=await db.from("notes").delete().eq("id",n.id).select();
+   if(r.error||!r.data.length){ev.target.disabled=false;ev.target.textContent="Delete note";const p=c.querySelector(".ferr");p.textContent="Couldn't delete. "+friendly(r.error||{message:"permission denied"});p.hidden=false;return}
+   NOTES=NOTES.filter(z=>z.id!==n.id);renderNotes();toast("Note deleted")});
+ }
+ const ei=e.target.closest("[data-edit-issue]");if(ei){openIssue(ISS.find(z=>z.id===ei.dataset.editIssue));return}
+ const eu=e.target.closest("[data-edit-due]");if(eu){openDue(SVC.find(z=>z.id===eu.dataset.editDue));return}
+ const a=e.target.closest("[data-act]");if(!a)return;
+ if(a.dataset.act==="add-issue")openIssue(null);
+ else if(a.dataset.act==="add-due")openDue(null);
+});
+
+renderNotes();loadLive();
 
 </script>
 

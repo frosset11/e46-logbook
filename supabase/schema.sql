@@ -57,3 +57,33 @@ create policy "editors change planned" on public.planned_purchases for update to
 create policy "editors remove planned" on public.planned_purchases for delete to authenticated using ((select private.is_editor()));
 
 -- To let someone else edit: insert into public.editors (email, name) values ('name@example.com', 'Name');
+
+-- Issues, baseline service items and notes (added 3 Nov 2026). Same access rules as the ledger.
+create table public.issues (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (length(trim(title)) > 0),
+  source text, notes text,
+  priority text not null default 'warn' check (priority in ('crit','warn','info')),
+  resolved boolean not null default false, resolved_on date, resolution text,
+  sort int not null default 0,
+  created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
+  updated_by text default (auth.jwt() ->> 'email')
+);
+create table public.service_items (
+  id uuid primary key default gen_random_uuid(),
+  item text not null check (length(trim(item)) > 0),
+  last_done text,
+  status text not null default 'warn' check (status in ('crit','warn','ok')),   -- crit = overdue, warn = check, ok = done
+  prev_status text check (prev_status in ('crit','warn')),                       -- restored when a tick is undone
+  done_on date, notes text, sort int not null default 0,
+  created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
+  updated_by text default (auth.jwt() ->> 'email')
+);
+create table public.notes (
+  id uuid primary key default gen_random_uuid(),
+  body text not null check (length(trim(body)) > 0),
+  done boolean not null default false, done_at timestamptz,
+  created_at timestamptz not null default now(), created_by text default (auth.jwt() ->> 'email'),
+  updated_at timestamptz not null default now(), updated_by text default (auth.jwt() ->> 'email')
+);
+-- each gets: touch_row trigger, RLS on, public select, editor-only insert/update/delete (see the ledger policies above)
