@@ -87,3 +87,8 @@ create table public.notes (
   updated_at timestamptz not null default now(), updated_by text default (auth.jwt() ->> 'email')
 );
 -- each gets: touch_row trigger, RLS on, public select, editor-only insert/update/delete (see the ledger policies above)
+
+-- 3 Nov 2026: who's on it + area
+alter table public.issues add column owner text, add column category text check (category in ('Mechanical','Body & interior'));
+alter table public.service_items add column owner text;
+-- Signups are limited to rows in public.editors by a before-insert trigger on auth.users (private.only_editors_can_sign_up).

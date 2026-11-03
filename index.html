@@ -425,6 +425,8 @@ body.can-edit .ro-only{display:none!important}
 @media (max-width:420px){.case-dl>div{grid-template-columns:1fr;gap:2px}}
 .case-meta{color:var(--muted);font-size:12.5px;margin:10px 0 16px}
 .case-ro{background:var(--surface-2);border-radius:8px;padding:12px;margin-bottom:16px}
+.src .who{font-weight:600;color:var(--fg)}
+#iss-cat{margin-right:auto}
 </style>
 
 <div class="app">
@@ -566,7 +568,7 @@ body.can-edit .ro-only{display:none!important}
     <div class="card">
       <div class="cardhead">
         <div><h2>Known issues</h2><p class="lede">From the listing, the seller's comments and what you've noticed driving it. Most urgent first.</p></div>
-        <div class="editbar-actions"><div class="seg" id="iss-seg" role="group" aria-label="Filter issues"></div><button class="btn ed-only" type="button" data-act="add-issue"><svg-i name="plus"></svg-i>Add issue</button></div>
+        <div class="editbar-actions"><div class="seg" id="iss-seg" role="group" aria-label="Filter issues"></div><div class="seg" id="iss-cat" role="group" aria-label="Filter issues by area"></div><button class="btn ed-only" type="button" data-act="add-issue"><svg-i name="plus"></svg-i>Add issue</button></div>
       </div>
       <ul class="rows" id="iss-list"></ul>
     </div>
@@ -1028,7 +1030,7 @@ const who=e=>e?(NAMES[e.toLowerCase()]||e):"";
 const dShort=iso=>{if(!iso)return"";const d=new Date(iso.length<=10?iso+"T12:00:00":iso);return d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear()};
 const tShort=iso=>{const d=new Date(iso);return d.getDate()+" "+MON[d.getMonth()]+", "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
 const tick=(attr,id,on,label)=>`<label class="tick ed-only" title="${on?"Mark as not done":"Mark as done"}"><input type="checkbox" ${attr}="${id}"${on?" checked":""}${id?"":" disabled"}><span class="sr">${esc(label)}</span></label>`;
-const FILT={iss:"open",due:"all",notes:"open"};
+const FILT={iss:"open",cat:"all",due:"all",notes:"open"};
 function segment(el,key,opts){
  el.innerHTML=opts.map(o=>`<button type="button" aria-pressed="${o.v===FILT[key]}" data-seg="${key}" data-v="${o.v}">${o.l}<b>${o.n}</b></button>`).join("");
 }
@@ -1036,13 +1038,15 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-seg]");if(
 
 function renderWork(){
  const iss=ISS.slice().sort((a,b)=>(a.resolved-b.resolved)||(RANK[a.p]-RANK[b.p])||(a.sort-b.sort));
- const open=iss.filter(x=>!x.resolved),cnt=p=>open.filter(x=>x.p===p).length;
- segment($("#iss-seg"),"iss",[{v:"open",l:"Open",n:open.length},{v:"crit",l:"Urgent",n:cnt("crit")},{v:"warn",l:"Soon",n:cnt("warn")},{v:"info",l:"Low",n:cnt("info")},{v:"done",l:"Done",n:iss.length-open.length}]);
- const f=FILT.iss,list=iss.filter(x=>f==="done"?x.resolved:(!x.resolved&&(f==="open"||x.p===f)));
+ const inCat=x=>FILT.cat==="all"||x.cat===FILT.cat;
+ segment($("#iss-cat"),"cat",[{v:"all",l:"All areas",n:ISS.filter(x=>!x.resolved).length},{v:"Mechanical",l:"Mechanical",n:ISS.filter(x=>!x.resolved&&x.cat==="Mechanical").length},{v:"Body & interior",l:"Body & interior",n:ISS.filter(x=>!x.resolved&&x.cat==="Body & interior").length}]);
+ const open=iss.filter(x=>!x.resolved&&inCat(x)),cnt=p=>open.filter(x=>x.p===p).length;
+ segment($("#iss-seg"),"iss",[{v:"open",l:"Open",n:open.length},{v:"crit",l:"Urgent",n:cnt("crit")},{v:"warn",l:"Soon",n:cnt("warn")},{v:"info",l:"Low",n:cnt("info")},{v:"done",l:"Done",n:iss.filter(x=>x.resolved&&inCat(x)).length}]);
+ const f=FILT.iss,list=iss.filter(x=>inCat(x)&&(f==="done"?x.resolved:(!x.resolved&&(f==="open"||x.p===f))));
  $("#iss-list").innerHTML=list.map(x=>`<li class="${x.resolved?"is-done":""}">${tick("data-tick-issue",x.id,x.resolved,"Mark “"+x.t+"” as done")}
   <button class="caserow" type="button" data-open-issue="${x.id||x.key}" aria-label="Open issue: ${esc(x.t)}"><span class="body"><span class="t"><span class="pill ${x.resolved?"p-ok":PL[x.p][1]}">${x.resolved?"Completed":PL[x.p][0]}</span> ${esc(x.t)}</span>
   ${x.resolved?`<span class="res">${svgI("check")}Completed${x.resolved_on?" "+dShort(x.resolved_on):""}${x.resolution?": "+esc(x.resolution):""}</span>`:""}
-  <span class="src">Source: ${esc(x.src||"—")}</span>${x.n?`<span class="n clamp">${esc(x.n)}</span>`:""}</span>${svgI("chev")}</button></li>`).join("")
+  <span class="src">${x.owner?`<b class="who">${esc(x.owner)}</b> · `:""}${x.cat?esc(x.cat)+" · ":""}Source: ${esc(x.src||"—")}</span>${x.n?`<span class="n clamp">${esc(x.n)}</span>`:""}</span>${svgI("chev")}</button></li>`).join("")
   ||`<li class="emptyrow">${f==="done"?"Nothing ticked off yet.":"No open issues in this group."}</li>`;
 
  const due=SVC.slice().sort((a,b)=>(RANK[a.s]-RANK[b.s])||(a.sort-b.sort));
@@ -1050,7 +1054,7 @@ function renderWork(){
  segment($("#due-seg"),"due",[{v:"all",l:"All",n:due.length},{v:"crit",l:"Overdue",n:dc("crit")},{v:"warn",l:"Check",n:dc("warn")},{v:"ok",l:"Done",n:dc("ok")}]);
  $("#due-list").innerHTML=due.filter(x=>FILT.due==="all"||x.s===FILT.due).map(x=>`<li class="${x.s==="ok"?"is-done":""}">${tick("data-tick-due",x.id,x.s==="ok","Mark “"+x.t+"” as done")}
   <button class="caserow" type="button" data-open-due="${x.id||x.key}" aria-label="Open service item: ${esc(x.t)}"><span class="body"><span class="t"><span class="pill ${DL[x.s][1]}">${x.s==="ok"?"Completed":DL[x.s][0]}</span> ${esc(x.t)}</span>
-  <span class="src">${x.s==="ok"&&x.done_on?"Completed "+dShort(x.done_on):"Last documented: "+esc(x.last||"—")}</span>${x.n?`<span class="n clamp">${esc(x.n)}</span>`:""}</span>${svgI("chev")}</button></li>`).join("")
+  <span class="src">${x.owner?`<b class="who">${esc(x.owner)}</b> · `:""}${x.s==="ok"&&x.done_on?"Completed "+dShort(x.done_on):"Last documented: "+esc(x.last||"—")}</span>${x.n?`<span class="n clamp">${esc(x.n)}</span>`:""}</span>${svgI("chev")}</button></li>`).join("")
   ||`<li class="emptyrow">Nothing in this group.</li>`;
  const ok=dueOk(),pct=due.length?Math.round(ok/due.length*100):0;
  ["#due","#rd"].forEach(p=>{$(p+"-prog-l").textContent=`${ok} of ${due.length} baseline items done`;const b=$(p+"-bar");b.setAttribute("aria-valuenow",pct);b.setAttribute("aria-valuemin",0);b.setAttribute("aria-valuemax",100);b.querySelector("i").style.width=pct+"%"});
@@ -1538,8 +1542,8 @@ async function loadWork(){
  if(!db)return;
  const [i,s,n]=await Promise.all([db.from("issues").select("*").order("sort").order("created_at"),db.from("service_items").select("*").order("sort").order("created_at"),db.from("notes").select("*").order("created_at",{ascending:false})]);
  if(i.error||s.error||n.error)throw(i.error||s.error||n.error);
- ISS=i.data.map(r=>({id:r.id,upd_at:r.updated_at,upd_by:r.updated_by,t:r.title,src:r.source,n:r.notes,p:r.priority,resolved:r.resolved,resolved_on:r.resolved_on,resolution:r.resolution,sort:r.sort}));
- SVC=s.data.map(r=>({id:r.id,upd_at:r.updated_at,upd_by:r.updated_by,t:r.item,last:r.last_done,s:r.status,prev:r.prev_status,done_on:r.done_on,n:r.notes,sort:r.sort}));
+ ISS=i.data.map(r=>({id:r.id,owner:r.owner,cat:r.category,upd_at:r.updated_at,upd_by:r.updated_by,t:r.title,src:r.source,n:r.notes,p:r.priority,resolved:r.resolved,resolved_on:r.resolved_on,resolution:r.resolution,sort:r.sort}));
+ SVC=s.data.map(r=>({id:r.id,owner:r.owner,upd_at:r.updated_at,upd_by:r.updated_by,t:r.item,last:r.last_done,s:r.status,prev:r.prev_status,done_on:r.done_on,n:r.notes,sort:r.sort}));
  NOTES=n.data;
  renderWork();renderNotes();
 }
@@ -1565,10 +1569,12 @@ document.addEventListener("change",async e=>{
 
 /* issue form */
 function openIssue(x){
- const has=!!x;x=x||{p:"warn"};
+ const has=!!x;x=x||{p:"warn",cat:FILT.cat==="all"?"":FILT.cat};
  openDrawer(has?"Edit issue":"Add issue",`<form id="f-is" novalidate>
   <div class="ff"><label for="is-t">Issue</label><input id="is-t" type="text" value="${esc(x.t||"")}" placeholder="e.g. Clutch pedal squeaks" required><p class="ferr" hidden></p></div>
   <fieldset class="ff"><legend>Status</legend><div class="choice">${ISTAT.map(([v,l])=>`<label><input type="radio" name="is-p" value="${v}"${(x.resolved?"done":x.p)===v?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>
+  <div class="ff"><label for="is-own">Who's on it <span class="opt">optional</span></label><input id="is-own" type="text" list="owner-list" autocomplete="off" value="${esc(x.owner||"")}" placeholder="ASR, Tuner, Us, Felipe, Bugsy…"><datalist id="owner-list"><option value="ASR"><option value="Tuner"><option value="Us"><option value="Felipe"><option value="Bugsy"><option value="Felipe + Bugsy"></datalist><p class="ferr" hidden></p></div>
+  <fieldset class="ff"><legend>Area</legend><div class="choice">${[["Mechanical","Mechanical"],["Body & interior","Body & interior"],["","Not set"]].map(([v,l])=>`<label><input type="radio" name="is-cat" value="${v}"${(x.cat||"")===v?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>
   <div class="ff"><label for="is-src">Source <span class="opt">optional</span></label><input id="is-src" type="text" value="${esc(x.src||"")}" placeholder="e.g. You, Bugsy, shop name"><p class="ferr" hidden></p></div>
   <div class="ff"><label for="is-n">Notes <span class="opt">optional</span></label><textarea id="is-n" placeholder="Likely cause, what to check, parts needed">${esc(x.n||"")}</textarea><p class="ferr" hidden></p></div>
   <div id="is-done-f"${x.resolved?"":" hidden"}>
@@ -1582,7 +1588,7 @@ function openIssue(x){
   f.addEventListener("change",()=>{$("#is-done-f").hidden=f.querySelector("[name=is-p]:checked").value!=="done"});
   f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;const b=$("#is-go");b.disabled=true;b.textContent="Saving…";
    const st=f.querySelector("[name=is-p]:checked").value,done=st==="done";
-   const row={title:$("#is-t").value.trim(),priority:done?(x.p||"warn"):st,source:$("#is-src").value.trim()||null,notes:$("#is-n").value.trim()||null,resolved:done,resolved_on:done?($("#is-on").value||today()):null,resolution:done?($("#is-res").value.trim()||null):null};
+   const row={title:$("#is-t").value.trim(),priority:done?(x.p||"warn"):st,source:$("#is-src").value.trim()||null,owner:$("#is-own").value.trim()||null,category:f.querySelector("[name=is-cat]:checked").value||null,notes:$("#is-n").value.trim()||null,resolved:done,resolved_on:done?($("#is-on").value||today()):null,resolution:done?($("#is-res").value.trim()||null):null};
    if(!has)row.sort=ISS.length?Math.max(...ISS.map(z=>z.sort||0))+1:0;
    const r=has?await db.from("issues").update(row).eq("id",x.id).select():await db.from("issues").insert(row).select();
    if(!r.error&&!r.data.length)r.error={message:"permission denied"};
@@ -1602,6 +1608,7 @@ function openDue(x){
   <div class="ff"><label for="du-t">Service item</label><input id="du-t" type="text" value="${esc(x.t||"")}" placeholder="e.g. Brake pads (front)" required><p class="ferr" hidden></p></div>
   <fieldset class="ff"><legend>Status</legend><div class="choice">${DSTAT.map(([v,l])=>`<label><input type="radio" name="du-s" value="${v}"${x.s===v?" checked":""}><span>${l}</span></label>`).join("")}</div></fieldset>
   <div class="ff" id="du-on-f"${x.s==="ok"?"":" hidden"}><label for="du-on">Done on</label><input id="du-on" type="date" value="${x.done_on||today()}"><p class="ferr" hidden></p></div>
+  <div class="ff"><label for="du-own">Who's on it <span class="opt">optional</span></label><input id="du-own" type="text" list="owner-list" autocomplete="off" value="${esc(x.owner||"")}" placeholder="ASR, Us, Felipe, Bugsy…"><datalist id="owner-list"><option value="ASR"><option value="Tuner"><option value="Us"><option value="Felipe"><option value="Bugsy"><option value="Felipe + Bugsy"></datalist><p class="ferr" hidden></p></div>
   <div class="ff"><label for="du-last">Last documented <span class="opt">optional</span></label><input id="du-last" type="text" value="${esc(x.last||"")}" placeholder="e.g. Oct 2026, ASR Performance"><p class="ferr" hidden></p></div>
   <div class="ff"><label for="du-n">Notes <span class="opt">optional</span></label><textarea id="du-n" placeholder="Why it matters, parts, fluid spec">${esc(x.n||"")}</textarea><p class="ferr" hidden></p></div>
   <div class="formerr" id="du-err" hidden></div>
@@ -1611,7 +1618,7 @@ function openDue(x){
   f.addEventListener("change",()=>{$("#du-on-f").hidden=f.querySelector("[name=du-s]:checked").value!=="ok"});
   f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;const b=$("#du-go");b.disabled=true;b.textContent="Saving…";
    const s=f.querySelector("[name=du-s]:checked").value;
-   const row={item:$("#du-t").value.trim(),status:s,done_on:s==="ok"?($("#du-on").value||today()):null,prev_status:s==="ok"?(x.s&&x.s!=="ok"?x.s:(x.prev||null)):null,last_done:$("#du-last").value.trim()||null,notes:$("#du-n").value.trim()||null};
+   const row={item:$("#du-t").value.trim(),status:s,done_on:s==="ok"?($("#du-on").value||today()):null,prev_status:s==="ok"?(x.s&&x.s!=="ok"?x.s:(x.prev||null)):null,last_done:$("#du-last").value.trim()||null,owner:$("#du-own").value.trim()||null,notes:$("#du-n").value.trim()||null};
    if(!has)row.sort=SVC.length?Math.max(...SVC.map(z=>z.sort||0))+1:0;
    const r=has?await db.from("service_items").update(row).eq("id",x.id).select():await db.from("service_items").insert(row).select();
    if(!r.error&&!r.data.length)r.error={message:"permission denied"};
@@ -1646,6 +1653,8 @@ function issueCaseHTML(x){
   </div>
   <dl class="case-dl">
    ${x.resolved?`<div><dt>Completed</dt><dd>${x.resolved_on?dShort(x.resolved_on):"—"}${x.resolution?`<p class="pre">${esc(x.resolution)}</p>`:""}</dd></div>`:""}
+   <div><dt>Who's on it</dt><dd>${esc(x.owner||"Not assigned")}</dd></div>
+   <div><dt>Area</dt><dd>${esc(x.cat||"—")}</dd></div>
    <div><dt>Source</dt><dd>${esc(x.src||"—")}</dd></div>
    <div><dt>Notes</dt><dd>${x.n?`<p class="pre">${esc(x.n)}</p>`:`<span class="muted">No notes yet.</span>`}</dd></div>
   </dl>
@@ -1663,6 +1672,7 @@ function dueCaseHTML(x){
   </div>
   <dl class="case-dl">
    ${x.s==="ok"?`<div><dt>Completed</dt><dd>${x.done_on?dShort(x.done_on):"—"}</dd></div>`:""}
+   <div><dt>Who's on it</dt><dd>${esc(x.owner||"Not assigned")}</dd></div>
    <div><dt>Last documented</dt><dd>${esc(x.last||"—")}</dd></div>
    <div><dt>Notes</dt><dd>${x.n?`<p class="pre">${esc(x.n)}</p>`:`<span class="muted">No notes yet.</span>`}</dd></div>
   </dl>
