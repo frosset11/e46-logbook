@@ -1,0 +1,59 @@
+-- E46 Logbook ledger schema (Supabase project e46-logbook, ref qyetcwgjqxzewwjktnfr)
+-- Anyone can read; only emails in public.editors can add, change or delete.
+
+create table public.editors (
+  email text primary key check (email = lower(email)),
+  name text not null
+);
+
+create table public.ledger_entries (
+  id uuid primary key default gen_random_uuid(),
+  entry_date date not null,
+  item text not null check (length(trim(item)) > 0),
+  mod text,                                   -- groups payments into one mod on the Upgrades page
+  type text not null check (type in ('Purchase','Part','Deposit','Service','Sale')),
+  paid_by text not null check (paid_by in ('Felipe','Bugsy','Split')),  -- for a Sale: who received the money
+  amount numeric(10,2) not null,              -- sales are stored as negative amounts
+  note text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  updated_by text default (auth.jwt() ->> 'email'),
+  constraint sale_sign check ((type = 'Sale' and amount <= 0) or (type <> 'Sale' and amount >= 0))
+);
+
+create table public.planned_purchases (
+  id uuid primary key default gen_random_uuid(),
+  item text not null check (length(trim(item)) > 0),
+  notes text,
+  est_cost numeric(10,2),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  updated_by text default (auth.jwt() ->> 'email')
+);
+
+create schema if not exists private;
+create or replace function private.is_editor() returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.editors where email = lower(auth.jwt() ->> 'email'));
+$$;
+
+create or replace function public.touch_row() returns trigger language plpgsql set search_path = public as $$
+begin new.updated_at := now(); new.updated_by := auth.jwt() ->> 'email'; return new; end $$;
+create trigger ledger_touch before update on public.ledger_entries for each row execute function public.touch_row();
+create trigger planned_touch before update on public.planned_purchases for each row execute function public.touch_row();
+
+alter table public.editors enable row level security;
+alter table public.ledger_entries enable row level security;
+alter table public.planned_purchases enable row level security;
+
+create policy "editors can see the editor list" on public.editors for select to authenticated using ((select private.is_editor()));
+create policy "anyone can read the ledger" on public.ledger_entries for select to anon, authenticated using (true);
+create policy "editors add entries" on public.ledger_entries for insert to authenticated with check ((select private.is_editor()));
+create policy "editors change entries" on public.ledger_entries for update to authenticated using ((select private.is_editor())) with check ((select private.is_editor()));
+create policy "editors remove entries" on public.ledger_entries for delete to authenticated using ((select private.is_editor()));
+create policy "anyone can read planned" on public.planned_purchases for select to anon, authenticated using (true);
+create policy "editors add planned" on public.planned_purchases for insert to authenticated with check ((select private.is_editor()));
+create policy "editors change planned" on public.planned_purchases for update to authenticated using ((select private.is_editor())) with check ((select private.is_editor()));
+create policy "editors remove planned" on public.planned_purchases for delete to authenticated using ((select private.is_editor()));
+
+-- To let someone else edit: insert into public.editors (email, name) values ('name@example.com', 'Name');

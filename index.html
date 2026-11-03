@@ -1,0 +1,1372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>E46 328Ci Logbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a service logbook — identity plate up top, summary tiles, then tabbed sheets (timeline, mileage, money, build, to-do, ledger, sources). Accent = the car's Fern Green Metallic. */
+:root{
+  --bg:#f3f5f2; --surface:#ffffff; --surface-2:#e9eee8; --line:#d3dbd2;
+  --fg:#18201a; --muted:#5b685d; --faint:#8a968b;
+  --fern:#2f6a48; --fern-ink:#ffffff; --fern-soft:#dbe9df;
+  --ok:#2d7a4b; --warn:#a86a10; --warn-soft:#f6ead2; --crit:#b23a2e; --crit-soft:#f6dcd8; --info:#2f5f8f; --info-soft:#dce7f2;
+  --display:"Saira Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111613; --surface:#18201b; --surface-2:#1f2a23; --line:#2d3a31;
+  --fg:#e6ece6; --muted:#a3b0a5; --faint:#748277;
+  --fern:#6fb58a; --fern-ink:#0f1a13; --fern-soft:#21382a;
+  --ok:#6fc08d; --warn:#e2a64a; --warn-soft:#3a2d17; --crit:#ef7d6f; --crit-soft:#3d1f1b; --info:#7fb0e0; --info-soft:#1c2b3b;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#18201b; --surface-2:#1f2a23; --line:#2d3a31;
+  --fg:#e6ece6; --muted:#a3b0a5; --faint:#748277;
+  --fern:#6fb58a; --fern-ink:#0f1a13; --fern-soft:#21382a;
+  --ok:#6fc08d; --warn:#e2a64a; --warn-soft:#3a2d17; --crit:#ef7d6f; --crit-soft:#3d1f1b; --info:#7fb0e0; --info-soft:#1c2b3b;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;margin:0}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:var(--fern)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--fern);outline-offset:2px}
+
+/* identity plate */
+.plate{display:grid;grid-template-columns:1fr auto;gap:16px 24px;align-items:end;padding-block:8px 18px;border-bottom:2px solid var(--fern)}
+.plate h1{font-size:clamp(28px,5vw,44px);font-weight:700;letter-spacing:.01em}
+.plate .sub{color:var(--muted);margin-top:4px}
+.vin{font-family:var(--mono);font-size:13px;border:1.5px solid var(--fg);border-radius:6px;padding:6px 10px;display:inline-flex;gap:10px;align-items:center;white-space:nowrap}
+.vin b{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.12em;color:var(--muted)}
+.owners{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:2px 9px;border-radius:999px;background:var(--surface-2);color:var(--fg);border:1px solid var(--line);white-space:nowrap}
+.chip .dot{width:8px;height:8px;border-radius:50%}
+@media (max-width:640px){.plate{grid-template-columns:1fr}}
+
+/* alert */
+.alert{margin-top:16px;display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 14px;border-radius:var(--radius);background:var(--fern-soft);border:1px solid color-mix(in srgb,var(--fern) 35%,transparent)}
+.alert .tag{font-family:var(--display);font-weight:700;color:var(--fern);letter-spacing:.08em;font-size:12px;text-transform:uppercase;padding-top:2px}
+.alert p{margin:0}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.tile .k{font-family:var(--display);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tile .v{font-family:var(--mono);font-size:24px;font-weight:500;margin-top:4px;font-variant-numeric:tabular-nums}
+.tile .s{color:var(--muted);font-size:13px;margin-top:2px}
+@media (max-width:860px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* tabs */
+.panel{padding-top:18px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;min-width:0}
+.card h2{font-size:19px;font-weight:600;margin-bottom:4px}
+.card .lede{color:var(--muted);font-size:13.5px;margin:0 0 10px}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--mono);font-size:10.5px}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .axis{stroke:var(--faint);stroke-width:1}
+
+/* timeline */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.filters input,.filters select{font:inherit;font-size:14px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);min-width:0}
+.filters input{flex:1 1 220px}
+.count{color:var(--muted);font-size:13px;margin-left:auto}
+.year{font-family:var(--display);font-weight:700;font-size:22px;color:var(--fern);margin:22px 0 8px;display:flex;align-items:baseline;gap:10px}
+.year span{font-family:var(--mono);font-weight:400;font-size:12px;color:var(--muted)}
+.entry{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:4px 16px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--oc,var(--line));border-radius:8px;margin-bottom:8px}
+.entry .d{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.entry .d b{display:block;color:var(--fg);font-weight:500;font-size:13px}
+.entry h3{font-family:var(--body);font-size:15.5px;font-weight:600}
+.entry .meta{color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:2px}
+.entry ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+.entry ul li{margin:1px 0}
+.entry .amt{font-family:var(--mono);font-size:15px;text-align:right;white-space:nowrap}
+.entry .amt small{display:block;font-size:11px;color:var(--muted)}
+.entry .note{font-size:13px;color:var(--muted);margin-top:6px}
+.cats{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.cat{font-size:11.5px;padding:1px 7px;border-radius:5px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.flag{font-size:11.5px;padding:1px 7px;border-radius:5px;background:var(--warn-soft);color:var(--warn);font-weight:600}
+.flag.info{background:var(--info-soft);color:var(--info)}
+.flag.crit{background:var(--crit-soft);color:var(--crit)}
+@media (max-width:640px){.entry{grid-template-columns:1fr}.entry .amt{text-align:left}}
+
+/* tables */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-weight:600;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+td.r,th.r{text-align:right}
+td.num{white-space:nowrap}
+tfoot td{font-weight:600}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.p-crit{background:var(--crit-soft);color:var(--crit)}
+.p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-ok{background:var(--fern-soft);color:var(--ok)}
+.p-info{background:var(--info-soft);color:var(--info)}
+
+/* build sheet */
+.build{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:960px){.build{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.build{grid-template-columns:1fr}}
+.build h3{font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fern);margin-bottom:6px}
+.build ul{list-style:none;margin:0;padding:0;font-size:14px}
+.build li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.build li:last-child{border-bottom:0}
+.ev{font-size:11.5px;white-space:nowrap;color:var(--muted)}
+.ev.yes{color:var(--ok);font-weight:600}
+
+
+
+/* car map */
+.map-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:960px){.map-layout{grid-template-columns:1fr}}
+.carsvg{width:100%;height:auto;display:block}
+.carsvg .body{fill:var(--surface-2);stroke:var(--fg);stroke-width:2;stroke-linejoin:round}
+.carsvg .glass{fill:color-mix(in srgb,var(--info) 18%,var(--surface));stroke:var(--fg);stroke-width:1.5}
+.carsvg .line{fill:none;stroke:var(--faint);stroke-width:1.2}
+.carsvg .tyre{fill:var(--fg)}
+.carsvg .rim{fill:var(--surface);stroke:var(--faint);stroke-width:1.5}
+.carsvg .lamp{fill:color-mix(in srgb,var(--warn) 35%,var(--surface));stroke:var(--fg);stroke-width:1}
+.carsvg .tail{fill:color-mix(in srgb,var(--crit) 55%,var(--surface));stroke:var(--fg);stroke-width:1}
+.carsvg .ground{stroke:var(--line);stroke-width:2}
+.hot{cursor:pointer;outline:none}
+.hot circle.ring{fill:var(--fern);stroke:var(--surface);stroke-width:2.5;transition:r .15s}
+.hot text{fill:var(--fern-ink);font-family:var(--mono);font-size:12px;font-weight:500;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.hot .halo{fill:var(--fern);opacity:0}
+.hot:hover .halo,.hot:focus-visible .halo{opacity:.22}
+.hot[aria-pressed="true"] circle.ring{fill:var(--warn)}
+.hot[aria-pressed="true"] .halo{fill:var(--warn);opacity:.28}
+.hot.empty circle.ring{fill:var(--faint)}
+.zones{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.zbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:13px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.zbtn b{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:12px}
+.zbtn[aria-pressed="true"]{background:var(--fern);border-color:var(--fern);color:var(--fern-ink)}
+.zbtn[aria-pressed="true"] b{color:var(--fern-ink)}
+.zone-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.zone-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 12px}
+.zone-stats div{background:var(--surface-2);border-radius:8px;padding:8px 10px}
+.zone-stats .k{font-family:var(--display);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.zone-stats .v{font-family:var(--mono);font-size:15px}
+.zlist li{border-left:3px solid var(--oc);padding:8px 10px;margin-bottom:6px;background:var(--surface-2);border-radius:0 6px 6px 0}
+.zlist .top{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
+.zlist .top .num{color:var(--fg)}
+.zlist .t{font-weight:600;font-size:14.5px;margin:2px 0}
+.zlist .it{font-size:13.5px;color:var(--muted)}
+
+.counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:10px 0 14px}
+@media (max-width:700px){.counters{grid-template-columns:1fr}}
+.counter{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--surface-2)}
+.counter .k{font-family:var(--display);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.counter .odo{font-family:var(--mono);font-size:26px;letter-spacing:.06em;margin-top:4px;font-variant-numeric:tabular-nums}
+.counter .s{font-size:13px;color:var(--muted)}
+.odo-in{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.odo-in input{font:inherit;font-family:var(--mono);width:9.5em;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
+.bar{height:6px;border-radius:3px;background:var(--surface);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--fern)}
+.ledger-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+@media (max-width:640px){.ledger-sum{grid-template-columns:1fr}}
+.foot{margin-top:30px;color:var(--faint);font-size:12.5px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+@media (prefers-reduced-motion:no-preference){.entry{transition:border-color .15s}}
+
+/* ---------- app shell (sidebar on desktop, sticky top nav on phones) ---------- */
+.app{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:18px 12px 16px;display:flex;flex-direction:column;gap:10px;z-index:20}
+.brand{display:flex;flex-direction:column;gap:2px;padding:4px 10px 10px;text-decoration:none;color:var(--fg);border-bottom:1px solid var(--line)}
+.brand b{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.01em}
+.brand span{font-size:12.5px;color:var(--muted)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav .grp{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:14px 10px 4px}
+.nav a{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-weight:500;font-size:14.5px;position:relative}
+.nav a svg{flex:none;width:18px;height:18px}
+.nav a:hover{background:var(--surface-2);color:var(--fg)}
+.nav a[aria-current="page"]{background:var(--fern-soft);color:var(--fg);font-weight:600}
+.nav a[aria-current="page"] svg{color:var(--fern)}
+.nav .n{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.nav .n.crit{color:var(--crit);font-weight:600}
+.side-foot{margin-top:auto;font-size:12px;color:var(--muted);padding:10px;border-top:1px solid var(--line);line-height:1.7}
+kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface-2);color:var(--fg)}
+.main{min-width:0;padding:26px 32px 64px;max-width:1220px}
+.sechead{padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.sechead .crumb{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--fern)}
+.sechead h1{font-size:clamp(26px,4vw,34px);font-weight:700;margin-top:2px}
+.sechead p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.sechead h1:focus{outline:none}
+.panel{padding-top:18px}
+@media (max-width:999px){
+  .app{display:block}
+  .side{position:sticky;top:0;height:auto;overflow:visible;padding:8px 0 0;gap:4px;border-right:0;border-bottom:1px solid var(--line);box-shadow:0 1px 4px rgb(0 0 0 / .05)}
+  .brand{flex-direction:row;align-items:baseline;gap:8px;padding:2px 16px 4px;border-bottom:0}
+  .brand b{font-size:17px}
+  .nav{flex-direction:row;overflow-x:auto;gap:2px;padding:0 10px 6px;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  .nav::-webkit-scrollbar{display:none}
+  .nav .grp{flex:none;font-size:0;padding:0;width:1px;height:22px;align-self:center;background:var(--line);margin:0 4px}
+  .nav .grp:first-child{display:none}
+  .nav a{flex:none;min-height:44px;white-space:nowrap;padding:0 12px}
+  .nav a:last-child{margin-right:40px}
+  .side-foot{display:none}
+  .main{padding:18px 16px 56px}
+}
+[id]{scroll-margin-top:24px}
+@media (max-width:999px){[id]{scroll-margin-top:118px}}
+
+/* ---------- overview: readiness + tiles + latest ---------- */
+.ready{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 20px;align-items:start}
+.ready .big{font-family:var(--mono);font-size:44px;line-height:1;color:var(--crit);font-variant-numeric:tabular-nums}
+.ready .big.ok{color:var(--ok)}
+.ready h2{font-size:19px;font-weight:600}
+.ready .lede{margin:2px 0 0}
+.prog{display:flex;align-items:center;gap:10px;margin:14px 0 4px;font-size:13px;color:var(--muted)}
+.prog .bar{flex:1;height:8px;margin:0;background:var(--surface-2)}
+.next{list-style:none;margin:12px 0 0;padding:0;border-top:1px solid var(--line)}
+.next li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.next li svg{width:18px;height:18px;margin-top:2px;color:var(--crit)}
+.next b{font-weight:600}
+.next span{display:block;color:var(--muted);font-size:13.5px}
+.linkbtn{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:600;color:var(--fern);text-decoration:none;background:none;border:0;padding:0;cursor:pointer}
+.linkbtn svg{width:16px;height:16px;transition:transform .15s}
+.linkbtn:hover svg{transform:translateX(2px)}
+a.tile{display:block;text-decoration:none;color:inherit;transition:border-color .15s,box-shadow .15s}
+a.tile:hover{border-color:color-mix(in srgb,var(--fern) 55%,var(--line));box-shadow:0 2px 10px rgb(0 0 0 / .05)}
+a.tile .k{display:flex;justify-content:space-between;align-items:center}
+a.tile .k svg{width:15px;height:15px;color:var(--muted)}
+.tile .v.crit{color:var(--crit)}
+.latest{list-style:none;margin:0;padding:0}
+.latest li{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:baseline}
+.latest li:last-child{border-bottom:0}
+.latest .d{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.latest .who{display:block;color:var(--muted);font-size:12.5px}
+.latest .num{text-align:right;white-space:nowrap}
+.latest .num.in{color:var(--ok)}
+.hist-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin:30px 0 12px}
+.hist-head h2{font-size:22px;font-weight:700}
+.hist-head p{margin:0;color:var(--muted);font-size:14px}
+
+/* ---------- issues & service rows ---------- */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;padding:3px;background:var(--surface-2);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:6px;min-height:40px;padding:0 12px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.seg button b{font-family:var(--mono);font-weight:500;font-size:12px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgb(0 0 0 / .08)}
+.cardhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.cardhead .lede{margin:0}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:grid;grid-template-columns:132px minmax(0,1fr);gap:4px 16px;padding:12px 0;border-top:1px solid var(--line)}
+.rows .t{font-weight:600}
+.rows .src{color:var(--muted);font-size:13px}
+.rows .n{color:var(--fg);font-size:14px;margin-top:3px}
+.rows .pill{justify-self:start}
+@media (max-width:640px){.rows li{grid-template-columns:1fr}}
+
+/* ---------- timeline filters ---------- */
+.fld{display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:600;color:var(--muted);min-width:0}
+.fld.grow{flex:1 1 240px}
+.filters{align-items:flex-end}
+.filters .count{align-self:center;margin-left:auto}
+.filters input,.filters select{min-height:40px}
+.btn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:14px;font-weight:600;cursor:pointer}
+.btn:hover{border-color:var(--faint)}
+.btn svg{width:15px;height:15px}
+.years{display:flex;gap:4px;flex-wrap:wrap;margin:-4px 0 6px}
+.years button{border:1px solid var(--line);background:var(--surface);border-radius:6px;min-height:36px;padding:0 8px;font-family:var(--mono);font-size:12.5px;color:var(--muted);cursor:pointer}
+.years button:hover{color:var(--fg);border-color:var(--faint)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--radius)}
+
+/* ---------- misc ---------- */
+.zlist{list-style:none;margin:0;padding:0}
+@media (min-width:961px){.map-layout>.card:first-child{position:sticky;top:20px}}
+.totop{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgb(0 0 0 / .10);opacity:0;pointer-events:none;transition:opacity .2s}
+.totop.on{opacity:1;pointer-events:auto}
+.totop svg{width:20px;height:20px}
+.foot{color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){
+  .panel:not([hidden]){animation:panel-in .2s cubic-bezier(.2,.7,.2,1)}
+  @keyframes panel-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
+@media (prefers-reduced-motion:reduce){.linkbtn svg,a.tile,.totop{transition:none}}
+
+[hidden]{display:none!important}
+.panel{scroll-margin-top:100vh}
+@media (max-width:640px){.years{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px}.years::-webkit-scrollbar{display:none}.years button{flex:none}.entry .amt.none{display:none}}
+.fld input,.fld select{flex:none;width:100%}
+@media (max-width:640px){
+  .ledger-sum{gap:8px}
+  .ledger-sum .tile{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px;align-items:baseline;padding:12px 14px}
+  .ledger-sum .tile .v{font-size:20px;margin:0;grid-row:1/3;grid-column:2;align-self:center}
+  .filters .fld:not(.grow){flex:1 1 30%}
+}
+@media (max-width:999px){.side{top:env(safe-area-inset-top,0px)}body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}}
+.totop{right:calc(18px + env(safe-area-inset-right,0px))}
+/* ---------- editing: bar, slide-over, forms, toast ---------- */
+.tbl-wrap{position:relative}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.editbar{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px}
+.sync{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted)}
+.sync i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.sync.live i{background:var(--ok)}
+.sync.error i{background:var(--warn)}
+.editbar-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.who-chip{font-size:13px;color:var(--muted)}
+.btn{color:var(--fg)}
+.btn.primary{background:var(--fern);border-color:var(--fern);color:var(--fern-ink)}
+.btn.primary:hover{border-color:var(--fern);filter:brightness(1.07)}
+.btn.danger{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 40%,var(--line))}
+.btn[disabled]{opacity:.65;cursor:progress}
+.ibtn{width:36px;height:36px;display:inline-grid;place-items:center;border:1px solid transparent;border-radius:8px;background:none;color:var(--muted);cursor:pointer}
+.ibtn:hover{background:var(--surface-2);color:var(--fg)}
+.ibtn svg{width:16px;height:16px}
+td.act,th.act{width:1%;padding:2px 4px;vertical-align:middle;text-align:right}
+body:not(.can-edit) .act,body:not(.can-edit) .ed-only{display:none!important}
+.cardhead.tight{margin-bottom:2px}
+.scrim{position:fixed;inset:0;background:rgb(10 16 12 / .40);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--surface);border-left:1px solid var(--line);z-index:41;display:flex;flex-direction:column;box-shadow:-8px 0 30px rgb(0 0 0 / .14);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
+.dr-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 12px 12px 18px;border-bottom:1px solid var(--line)}
+.dr-head h2{font-size:20px;font-weight:700}
+.dr-head .ibtn{width:44px;height:44px}
+.dr-body{flex:1;overflow-y:auto;padding:18px}
+.dr-body .lede{color:var(--muted);margin:0 0 16px}
+@media (prefers-reduced-motion:no-preference){.drawer.open{animation:dr-in .22s cubic-bezier(.2,.7,.2,1)}@keyframes dr-in{from{transform:translateX(28px);opacity:0}to{transform:none;opacity:1}}}
+.ff{display:flex;flex-direction:column;gap:5px;margin:0 0 14px;min-width:0}
+fieldset.ff{border:0;padding:0}
+.ff label,.ff legend{font-weight:600;font-size:13.5px;padding:0}
+.ff legend{margin-bottom:5px}
+.ff .opt{font-weight:400;color:var(--muted)}
+.ff input:not([type=radio]),.ff textarea{font:inherit;font-size:16px;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);width:100%}
+.ff textarea{min-height:76px;resize:vertical}
+.ff input:focus,.ff textarea:focus{border-color:var(--fern)}
+.ff [aria-invalid="true"]{border-color:var(--crit)!important}
+.ff .hint{font-size:12.5px;color:var(--muted);margin:0}
+.ff .ferr,.ferr{font-size:13px;color:var(--crit);margin:0}
+.choice{display:flex;flex-wrap:wrap;gap:6px}
+.choice label{position:relative;font-weight:600}
+.choice input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.choice span{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:8px;font-size:14px;color:var(--muted);background:var(--surface)}
+.choice input:checked+span{border-color:var(--fern);background:var(--fern-soft);color:var(--fg)}
+.choice input:focus-visible+span{outline:2px solid var(--fern);outline-offset:2px}
+.effect{background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:14px;margin:-4px 0 16px}
+.dr-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.dr-actions .btn{min-height:44px}
+.confirm{border:1px solid color-mix(in srgb,var(--crit) 40%,var(--line));background:var(--crit-soft);border-radius:8px;padding:12px;margin-top:16px}
+.formerr{background:var(--crit-soft);color:var(--crit);border-radius:8px;padding:10px 12px;font-size:14px;margin:0 0 14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <a class="brand" href="#overview" data-go="overview"><b>E46 Logbook</b><span>2000 328Ci · M54 swap</span></a>
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+    <div class="side-foot"><kbd>1</kbd>–<kbd>9</kbd> jump to a section<br><kbd>/</kbd> search the timeline</div>
+  </aside>
+
+  <main class="main" id="main">
+  <header class="sechead" id="sechead" hidden>
+    <div class="crumb" id="crumb"></div>
+    <h1 id="sectitle" tabindex="-1"></h1>
+    <p id="secdesc"></p>
+  </header>
+
+  <!-- OVERVIEW -->
+  <section class="panel" id="overview" aria-label="Overview" style="padding-top:0">
+    <header class="plate">
+      <div>
+        <h1 id="ov-title" tabindex="-1">2000 BMW 328Ci Coupe · M54 swap</h1>
+        <div class="sub">Fern Green Metallic · 5-speed manual · prepped for SCCA Street Modified · co-owned by Felipe &amp; Bugsy (50/50)</div>
+        <div class="owners" id="owners"></div>
+      </div>
+      <div class="vin"><b>VIN</b>WBABM5346YJP02514</div>
+    </header>
+
+    <section class="tiles" aria-label="Summary">
+      <a class="tile" href="#todo" data-go="todo"><div class="k">Urgent items <svg-i name="arrow"></svg-i></div><div class="v crit" id="t-urgent">–</div><div class="s" id="t-urgent-s">–</div></a>
+      <a class="tile" href="#ledger" data-go="ledger"><div class="k">Who owes whom <svg-i name="arrow"></svg-i></div><div class="v" id="t-bal">–</div><div class="s" id="t-bal-s">–</div></a>
+      <a class="tile" href="#ledger" data-go="ledger"><div class="k">Total invested <svg-i name="arrow"></svg-i></div><div class="v" id="t-inv">–</div><div class="s" id="t-inv-s">–</div></a>
+      <a class="tile" href="#mileage" data-go="overview" data-scroll="mileage"><div class="k">Chassis miles <svg-i name="arrow"></svg-i></div><div class="v" id="t-miles">264,400</div><div class="s">engine ≈130k · last reading Aug 2026</div></a>
+    </section>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <div class="ready">
+          <div class="big" id="rd-n">–</div>
+          <div><h2>Before the first track day</h2><p class="lede" id="rd-lede">–</p></div>
+        </div>
+        <div class="prog"><span id="rd-prog-l">–</span><div class="bar" role="progressbar" aria-label="Baseline service done" id="rd-bar"><i></i></div></div>
+        <ul class="next" id="rd-next"></ul>
+        <a class="linkbtn" href="#todo" data-go="todo">Open issues &amp; service <svg-i name="arrow"></svg-i></a>
+      </div>
+      <div class="card">
+        <h2>Latest activity</h2>
+        <p class="lede">Most recent entries in the shared ledger.</p>
+        <ul class="latest" id="latest"></ul>
+        <div class="dr-actions" style="justify-content:space-between"><a class="linkbtn" href="#ledger" data-go="ledger">Open the ledger <svg-i name="arrow"></svg-i></a><button class="btn primary ed-only" type="button" data-act="add"><svg-i name="plus"></svg-i>Add entry</button></div>
+      </div>
+    </div>
+
+    <div class="card" id="mileage" style="margin-top:16px">
+      <div class="zone-head"><h2>Mileage counters</h2>
+        <div class="odo-in"><label for="odo-now">Current odometer</label><input id="odo-now" type="number" inputmode="numeric" min="264400" step="1" value="264400"><span style="color:var(--muted);font-size:12.5px">last reading: 264,400 (Aug 2026)</span></div></div>
+      <p class="lede">The engine came from a 2004 BMW 330, VIN WBABW534X4PL41967, with 118,067 mi when LKQ sold it on 2 Jul 2018. It went in on 15 Aug 2018. The swap invoices don't record the chassis mileage, so the reading at the swap is estimated from the readings either side (245,894 in Aug 2017 and 256,894 in Mar 2019).</p>
+      <div class="counters">
+        <div class="counter"><div class="k">Chassis</div><div class="odo" id="c-chassis">–</div><div class="s">original body, gearbox position, suspension mounts</div></div>
+        <div class="counter"><div class="k">Engine (M54 donor)</div><div class="odo" id="c-engine">–</div><div class="s">118,067 at purchase + miles since swap</div></div>
+        <div class="counter"><div class="k">Since the swap</div><div class="odo" id="c-swap">–</div><div class="s" id="c-swap-s">–</div></div>
+      </div>
+      <h3 style="font-size:15px;font-weight:600;margin:4px 0 6px">Running gear: miles on each part</h3>
+      <div class="tbl-wrap"><table id="tbl-parts"><thead><tr><th>Part</th><th>Fitted</th><th class="r">Chassis at fit</th><th class="r">Miles on part</th><th>Source</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="hist-head"><h2>History, 1999–2026</h2><p id="hist-sum">–</p></div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Odometer over time</h2>
+        <p class="lede">Every dated reading from the Carfax, invoices and the listing. Colour shows the owner. Carfax reports no rollback.</p>
+        <svg class="chart" id="chart-miles" viewBox="0 0 560 260" role="img" aria-label="Odometer readings 1999 to 2026"></svg>
+        <div class="legend" id="legend-miles"></div>
+      </div>
+      <div class="card">
+        <h2>Documented spend per year</h2>
+        <p class="lede">Invoice totals by year (previous owners). 2018 is the engine swap year.</p>
+        <svg class="chart" id="chart-spend" viewBox="0 0 560 260" role="img" aria-label="Spend per year"></svg>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h2>Miles driven per year</h2>
+        <p class="lede">From the first and last reading in each period. A daily driver until 2017; barely driven since 2020.</p>
+        <div class="tbl-wrap"><table id="tbl-annual"><thead><tr><th>Period</th><th class="r">Start</th><th class="r">End</th><th class="r">Miles/yr</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="card">
+        <h2>Where the money went</h2>
+        <p class="lede">Documented spend by system. A job that touched several systems is counted under its main one.</p>
+        <div class="tbl-wrap"><table id="tbl-cats"><thead><tr><th>System</th><th class="r">Jobs</th><th class="r">Spend</th><th>Share</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Key findings</h2>
+      <div class="tbl-wrap"><table><tbody id="findings"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- CAR MAP -->
+  <section class="panel" id="carmap" aria-labelledby="sectitle" hidden>
+    <div class="map-layout">
+      <div class="card">
+        <h2>Where the work was done</h2>
+        <p class="lede">Select a point on the car to see every job on that part, oldest first. The number is how many records touch it.</p>
+        <svg class="carsvg" id="carsvg" viewBox="0 0 800 300" role="group" aria-label="Side view of the E46 coupe with selectable areas">
+          <line class="ground" x1="20" y1="268" x2="780" y2="268"/>
+          <path class="body" d="M62,232 C50,226 44,212 46,196 C47,184 50,176 58,170 L92,160 C150,150 230,142 288,137 C318,118 350,98 380,87 C420,78 470,76 505,80 C540,85 568,100 594,114 C630,118 668,120 694,124 C708,127 714,134 716,146 L720,178 C721,198 716,214 704,226 L690,232 L642,232 A42,42 0 0 0 558,232 L227,236 A42,42 0 0 0 143,232 Z"/>
+          <path class="glass" d="M306,134 C334,114 358,100 382,92 C420,84 462,82 498,86 C520,89 538,98 556,110 L548,128 C470,130 380,132 306,134 Z"/>
+          <path class="line" d="M462,84 L466,131"/>
+          <path class="line" d="M300,140 L298,226 M462,134 L470,226 M300,226 L470,226"/>
+          <path class="line" d="M92,160 L288,137"/>
+          <path class="line" d="M600,116 L604,124 L694,126"/>
+          <path class="line" d="M232,200 C320,196 460,196 552,200"/>
+          <path class="lamp" d="M52,176 L88,165 L94,176 L58,186 Z"/>
+          <path class="tail" d="M700,132 L716,140 L718,160 L700,158 Z"/>
+          <path class="body" d="M312,128 l18,-6 l4,12 l-20,4 z" style="stroke-width:1.5"/>
+          <circle class="tyre" cx="185" cy="232" r="34"/><circle class="rim" cx="185" cy="232" r="22"/>
+          <circle class="tyre" cx="600" cy="232" r="34"/><circle class="rim" cx="600" cy="232" r="22"/>
+          <g id="hotspots"></g>
+        </svg>
+        <div class="zones" id="zones" role="group" aria-label="Areas of the car"></div>
+      </div>
+      <div class="card" id="zonepanel" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- BUILD -->
+  <section class="panel" id="build" aria-labelledby="sectitle" hidden>
+    <p class="lede" style="color:var(--muted);margin:0 0 14px"><span class="ev yes">Invoice</span> means a receipt backs it up; <span class="ev">Seller only</span> means it is only in the Cars &amp; Bids listing.</p>
+    <div class="build" id="buildsheet"></div>
+    <div class="card" style="margin-top:16px">
+      <h2>Spares and extras included in the sale</h2>
+      <ul id="extras" style="margin:6px 0 0;padding-left:18px"></ul>
+    </div>
+  </section>
+
+  <!-- TODO -->
+  <section class="panel" id="todo" aria-labelledby="sectitle" hidden>
+    <div class="card">
+      <div class="cardhead">
+        <div><h2>Known issues</h2><p class="lede">From the listing, the seller's comments and what you've noticed driving it. Most urgent first.</p></div>
+        <div class="seg" id="iss-seg" role="group" aria-label="Filter issues by priority"></div>
+      </div>
+      <ul class="rows" id="iss-list"></ul>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="cardhead">
+        <div><h2>Baseline service</h2><p class="lede">When each item was last done according to the records. Where there is no record, assume it is due.</p></div>
+        <div class="seg" id="due-seg" role="group" aria-label="Filter service items by status"></div>
+      </div>
+      <div class="prog" style="margin-top:0"><span id="due-prog-l">–</span><div class="bar" role="progressbar" aria-label="Baseline service done" id="due-bar"><i></i></div></div>
+      <ul class="rows" id="due-list"></ul>
+    </div>
+  </section>
+
+  <!-- LEDGER -->
+  <section class="panel" id="ledger" aria-labelledby="sectitle" hidden>
+    <div class="editbar"><div class="sync" id="sync" role="status"></div><div class="editbar-actions" id="edit-actions"></div></div>
+    <div class="ledger-sum" id="ledger-sum"></div>
+    <div class="card">
+      <h2>Who owes what</h2>
+      <p class="lede">What each of you has put in or taken out, compared with your 50/50 share. Money received from a sale counts against whoever kept it.</p>
+      <div class="tbl-wrap"><table id="tbl-owe"><thead><tr><th>Owner</th><th class="r">Paid for parts &amp; purchase</th><th class="r">Kept from sales</th><th class="r">Net put in</th><th class="r">50/50 share</th><th class="r">Balance</th></tr></thead><tbody></tbody></table></div>
+      <p id="owe-line" style="margin:12px 0 0;font-weight:600"></p>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Shared costs and income</h2>
+      <p class="lede">Everything from the purchase onwards is split 50/50. Previous owners' service costs are history only and are not included here.</p>
+      <div class="tbl-wrap"><table id="tbl-ledger"><thead><tr><th>Date</th><th>Item</th><th>Type</th><th>Paid / received by</th><th class="r">Amount</th><th class="r">Felipe share</th><th class="r">Bugsy share</th><th class="act"><span class="sr">Edit</span></th></tr></thead><tbody></tbody><tfoot></tfoot></table></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="cardhead tight"><h2>Planned purchases</h2><button class="btn ed-only" type="button" data-act="add-planned"><svg-i name="plus"></svg-i>Add planned purchase</button></div>
+      <p class="lede">Not bought yet. These move into the ledger once they're paid.</p>
+      <div class="tbl-wrap"><table id="tbl-planned"><thead><tr><th>Item</th><th>Notes</th><th class="r">Est. cost</th><th class="r">Each</th><th class="act"><span class="sr">Edit</span></th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- UPGRADES -->
+  <section class="panel" id="upgrades" aria-labelledby="sectitle" hidden>
+    <div class="ledger-sum" id="upg-sum"></div>
+    <div class="card">
+      <div class="cardhead tight"><h2>Mods list</h2><button class="btn ed-only" type="button" data-act="add" data-type="Part"><svg-i name="plus"></svg-i>Add a part</button></div>
+      <p class="lede">Each mod with its full cost, including deposits and hardware. Built from the ledger, where the separate payments are listed.</p>
+      <div class="tbl-wrap"><table id="tbl-upg"><thead><tr><th>First bought</th><th>Mod</th><th>Paid by</th><th class="r">Total cost</th><th class="r">Each</th></tr></thead><tbody></tbody><tfoot></tfoot></table></div>
+    </div>
+  </section>
+
+  <!-- SOLD -->
+  <section class="panel" id="sold" aria-labelledby="sectitle" hidden>
+    <div class="ledger-sum" id="sold-sum"></div>
+    <div class="card">
+      <div class="cardhead tight"><h2>Parts sold off the car</h2><button class="btn ed-only" type="button" data-act="add" data-type="Sale"><svg-i name="plus"></svg-i>Log a sale</button></div>
+      <p class="lede">Money from each sale is shared 50/50. Whoever received it owes the other half, which the ledger already counts.</p>
+      <div class="tbl-wrap"><table id="tbl-sold"><thead><tr><th>Date</th><th>Item</th><th>Received by</th><th class="r">Sold for</th><th class="r">Each</th><th class="act"><span class="sr">Edit</span></th></tr></thead><tbody></tbody><tfoot></tfoot></table></div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="panel" id="timeline" aria-labelledby="sectitle" hidden>
+    <div class="filters">
+      <label class="fld grow">Search<input id="q" type="search" placeholder="e.g. water pump, Pierre's, VANOS"></label>
+      <label class="fld">Owner<select id="f-owner"></select></label>
+      <label class="fld">System<select id="f-cat"></select></label>
+      <label class="fld">Order<select id="f-order"><option value="asc">Oldest first</option><option value="desc">Newest first</option></select></label>
+      <button class="btn" type="button" id="f-clear" hidden><svg-i name="x"></svg-i>Clear filters</button>
+      <span class="count" id="count" aria-live="polite"></span>
+    </div>
+    <div class="years" id="years" role="group" aria-label="Jump to year"></div>
+    <div id="entries"></div>
+  </section>
+
+  <!-- SOURCES -->
+  <section class="panel" id="sources" aria-labelledby="sectitle" hidden>
+    <div class="card">
+      <h2>Documents reviewed</h2>
+      <p class="lede">The Carfax, 42 unique photos of invoices and reports, and the Cars &amp; Bids listing. The Take 5 receipt was photographed twice and is counted once.</p>
+      <div class="tbl-wrap"><table id="tbl-sources"><thead><tr><th>Source</th><th>Documents</th><th>Period</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <p class="foot" id="foot">Built from the Carfax for WBABM5346YJP02514 (run 2 Oct 2026), the previous owners' paper invoices and the Cars &amp; Bids listing (auction ended 13 Aug 2026). Handwritten amounts marked <span class="flag">≈</span> are best reads of faded copies. Purchased 1 Oct 2026.</p>
+  </main>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-title" hidden>
+  <header class="dr-head"><h2 id="dr-title"></h2><button class="ibtn" id="dr-close" type="button" aria-label="Close" title="Close (Esc)"><svg-i name="x"></svg-i></button></header>
+  <div class="dr-body" id="dr-body"></div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<button class="totop" id="totop" type="button" aria-label="Back to top" title="Back to top"><svg-i name="up"></svg-i></button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+
+/* ---------- Lucide icons (inlined) ---------- */
+const ICON={
+ dash:'<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+ car:'<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+ list:'<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+ wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+ wallet:'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+ trend:'<path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/>',
+ tag:'<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+ history:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+ file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+ alert:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+ arrow:'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+ x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+ up:'<path d="m18 15-6-6-6 6"/>',
+ plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+ pencil:'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+ login:'<path d="m10 17 5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>',
+ refresh:'<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>'
+};
+const svgI=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICON[n]}</svg>`;
+document.querySelectorAll("svg-i").forEach(el=>{el.outerHTML=svgI(el.getAttribute("name"))});
+
+const SECTIONS=[
+ {id:"overview",g:"Car",label:"Overview",icon:"dash",desc:""},
+ {id:"carmap",g:"Car",label:"Car map",icon:"car",desc:"Every record placed on the part of the car it touched."},
+ {id:"build",g:"Car",label:"Build sheet",icon:"list",desc:"Equipment the seller listed on Cars & Bids, checked against the invoices."},
+ {id:"todo",g:"Work",label:"Issues & service",icon:"wrench",desc:"Known problems and the baseline service to do before the first track day."},
+ {id:"ledger",g:"Money",label:"Ledger",icon:"wallet",desc:"Shared costs and income since the purchase on 1 Oct 2026, split 50/50."},
+ {id:"upgrades",g:"Money",label:"Upgrades",icon:"trend",desc:"Every mod with its full cost, built from the ledger."},
+ {id:"sold",g:"Money",label:"Sold items",icon:"tag",desc:"Parts sold off the car and how the money splits."},
+ {id:"timeline",g:"History",label:"Service timeline",icon:"history",desc:"Every invoice, report and Carfax record from 1999 to today."},
+ {id:"sources",g:"History",label:"Sources",icon:"file",desc:"The documents this logbook was built from."}
+];
+
+const OWNERS={
+  murphy:{name:"Owner 1 (P. Murphy)",short:"Owner 1",place:"Winter Park → Altamonte Springs → Longwood, FL",span:"Dec 1999 – Oct 2017",color:"#4f7fb0"},
+  scott:{name:"Owner 2 (W. Scott)",short:"Owner 2",place:"Melbourne, FL",span:"Oct 2017 – Feb 2020",color:"#c7792b"},
+  littlejohn:{name:"Owner 3 (J. Littlejohn)",short:"Owner 3",place:"Tallahassee, FL",span:"Feb 2020 – Apr 2025",color:"#8a63b8"},
+  wrencher:{name:"Owner 4 (Jason)",short:"Owner 4 · Jason",place:"Tallahassee, FL",span:"Apr 2025 – Oct 2026",color:"#b0455b"},
+  us:{name:"Felipe & Bugsy",short:"Us",place:"Miami, FL",span:"Oct 2026 –",color:"#2f6a48"},
+  bmw:{name:"BMW NA (recall)",short:"BMW",place:"",span:"",color:"#7a8580"}
+};
+// conf: "ok" printed invoice, "hand" handwritten/partly legible, "est" estimated, "report" from a report not an invoice
+const R=[
+ {d:"1999-12-20",o:"murphy",shop:"US Customs (Carfax)",t:"Imported via Charleston, SC",cats:["Ownership"],items:["Exported from the US Virgin Islands, imported to Charleston, SC"],amt:null,conf:"cf"},
+ {d:"1999-12-28",mi:5,o:"murphy",shop:"Dealer (Carfax)",t:"Pre-delivery inspection",cats:["Service"],items:["PDI, floor mats, keys programmed"],amt:null,conf:"cf"},
+ {d:"1999-12-30",mi:6,o:"murphy",shop:"Winter Park, FL (Carfax)",t:"Sold new to Owner 1",cats:["Ownership"],items:["First owner, personal vehicle, loan reported"],amt:null,conf:"cf"},
+ {d:"2000-08-16",mi:13110,o:"murphy",shop:"Service facility (Carfax)",t:"Oil service, throttle housing",cats:["Service","Engine"],items:["Oil + filter","Throttle valve/housing replaced","Door locks checked"],amt:null,conf:"cf"},
+ {d:"2001-03-05",mi:23959,o:"murphy",shop:"Service facility (Carfax)",t:"Service visit",cats:["Service"],items:["Vehicle serviced"],amt:null,conf:"cf"},
+ {d:"2001-03-20",mi:25167,o:"murphy",shop:"Service facility (Carfax)",t:"Blower motor controller",cats:["A/C"],items:["Blower motor controller + limit switch","A/C checked"],amt:null,conf:"cf"},
+ {d:"2001-05-15",mi:27843,o:"murphy",shop:"Service facility (Carfax)",t:"Inspection, brake fluid",cats:["Service","Brakes"],items:["Maintenance inspection","Brake fluid flush"],amt:null,conf:"cf"},
+ {d:"2002-01-02",mi:43092,o:"murphy",shop:"Service facility (Carfax)",t:"Oil service, thermostat",cats:["Service","Cooling"],items:["Oil + filter","Thermostat"],amt:null,conf:"cf"},
+ {d:"2002-02-06",mi:44610,o:"murphy",shop:"Service facility (Carfax)",t:"Recommended maintenance",cats:["Service"],items:["Recommended maintenance performed (also a visit 18 Feb, 44,988 mi)"],amt:null,conf:"cf"},
+ {d:"2002-05-28",mi:50536,o:"murphy",shop:"Service facility (Carfax)",t:"Tyres, emissions service",cats:["Wheels & tyres","Engine"],items:["Four tyres replaced and balanced","Emissions system serviced"],amt:null,conf:"cf"},
+ {d:"2002-07-17",mi:54092,o:"murphy",shop:"Service facility (Carfax)",t:"Front rotors",cats:["Brakes"],items:["Front brake rotors replaced"],amt:null,conf:"cf"},
+ {d:"2003-02-10",mi:64153,o:"murphy",shop:"Service facility (Carfax)",t:"Battery",cats:["Electrical"],items:["Battery replaced"],amt:null,conf:"cf"},
+ {d:"2003-05-16",mi:69139,o:"murphy",shop:"Service facility (Carfax)",t:"Window regulator",cats:["Body"],items:["Window regulator replaced (more visits 30 May at 69,872 and 21 Jul at 73,964 mi)"],amt:null,conf:"cf"},
+ {d:"2006-07-14",o:"murphy",shop:"Damage report (Carfax)",t:"Damage: left front door",cats:["Body"],items:["Parts requested: left front door, left door mirror, left front window regulator"],note:"Only damage event on the Carfax. No structural damage or airbag deployment reported. Worth checking door fit and paint on the left side.",amt:null,conf:"cf"},
+ {d:"2007-06-27",mi:141192,o:"murphy",shop:"Euro Specialist, Longwood (Carfax)",t:"Battery",cats:["Electrical"],items:["Battery replaced, charging system checked"],amt:null,conf:"cf"},
+ {d:"2007-07-13",mi:141773,o:"murphy",shop:"Euro Specialist (Carfax)",t:"Control arms, brakes, alignment",cats:["Suspension","Brakes","Service"],items:["Control arms + bushings","Brake pads + sensors","Idler pulley, thermostat","A/C recharge, oil service, 4-wheel alignment"],amt:null,conf:"cf"},
+ {d:"2007-09-28",mi:144258,o:"murphy",shop:"Euro Specialist (Carfax)",t:"Valve cover gasket",cats:["Engine"],items:["Valve cover gasket"],amt:null,conf:"cf"},
+ {d:"2008-03-05",mi:149807,o:"murphy",shop:"Euro Specialist (Carfax)",t:"Inspection, oil service",cats:["Service"],items:["Maintenance inspection, oil, tyre rotation, wipers"],amt:null,conf:"cf"},
+ {d:"2008-06-19",mi:153481,o:"murphy",shop:"Euro Specialist (Carfax)",t:"Radiator, coolant, brakes, A/C valve",cats:["Cooling","Brakes","A/C"],items:["Radiator, radiator hoses, coolant reservoir, coolant level sensor, coolant flush","Brake fluid flush, front pads + sensors","A/C expansion valve, recharge","Oil pressure switch, oil service"],amt:null,conf:"cf"},
+ {d:"2009-02-13",mi:160023,o:"murphy",shop:"Euro Specialist (Carfax)",t:"Inspection, oil service",cats:["Service"],items:["Maintenance inspection, oil + filter"],amt:null,conf:"cf"},
+ {d:"2009-03-11",mi:160751,o:"murphy",shop:"Euro Specialist (Carfax)",t:"Water pump, P/S fluid",cats:["Cooling","Steering"],items:["Water pump","Power steering fluid flush","Radiator hose clamp"],amt:null,conf:"cf"},
+ {d:"2009-10-01",mi:166783,o:"murphy",shop:"Euro Specialist (Carfax)",t:"Tyres, alignment",cats:["Wheels & tyres","Service"],items:["Four tyres mounted and balanced, 4-wheel alignment","Oil service, turn signal repair, wheel bearings checked"],amt:null,conf:"cf"},
+  {d:"2010-01-20",mi:170241,o:"murphy",shop:"German MotorWerks, Winter Springs",t:"Door lock, washer pump, horn",cats:["Body","Electrical"],items:["Driver's door latch/actuator assembly","Windshield washer pump + grommet","Horn fuse (blown)"],amt:513.87},
+ {d:"2010-05-04",mi:173331,o:"murphy",shop:"German MotorWerks",t:"Oil service",cats:["Service"],items:["Oil + filter, 7 qt Amsoil 20W-50"],note:"Flagged: oil filter housing gasket, rear diff bushing, front pads soon.",amt:123.75},
+ {d:"2010-06-11",mi:175548,o:"murphy",shop:"German MotorWerks",t:"Rear diff bushing, oil filter housing gasket",cats:["Drivetrain","Engine","Body"],items:["Rear differential bushing","Oil filter housing gasket (oil leak)","Right front turn signal","Hood roundel"],amt:800.36},
+ {d:"2010-12-08",mi:180885,o:"murphy",shop:"German MotorWerks",t:"Oil service",cats:["Service"],items:["Oil + filter, Amsoil 20W-50"],amt:123.75},
+ {d:"2011-04-14",mi:184012,o:"murphy",shop:"German MotorWerks",t:"Front brakes, power steering hose, VANOS oil line",cats:["Brakes","Steering","Engine"],items:["Front Pagid pads + wear sensor","P/S pressure hose","Oil supply hose to VANOS","Driver-side bumper reflector"],amt:740.25},
+ {d:"2011-07-18",mi:186687,o:"murphy",shop:"German MotorWerks",t:"Power steering pump",cats:["Steering"],items:["P/S pump (updated LF-30)","Pressure hose, reservoir, reservoir hoses"],amt:1144.38},
+ {d:"2012-05-23",mi:193860,o:"murphy",shop:"German MotorWerks",t:"Oil service",cats:["Service"],items:["Oil + filter, Amsoil 20W-50"],amt:123.81},
+ {d:"2012-07-24",mi:195524,o:"murphy",shop:"German MotorWerks",t:"Battery (no crank, towed)",cats:["Electrical"],items:["Interstate MTP-H7 battery + vent elbow","Charging system tested OK","Tow $51"],amt:339.68},
+ {d:"2012-08-15",mi:196907,o:"murphy",shop:"German MotorWerks",t:"Door speakers, brake bulb",cats:["Electrical"],items:["Both front 5¼\" door speakers","Left rear brake bulb"],amt:296.38,conf:"est",note:"Total cut off in photo; computed from subtotal + tax."},
+ {d:"2012-11-28",mi:200744,o:"murphy",shop:"German MotorWerks",t:"Gas cap, fuel trim faults",cats:["Engine"],items:["New gas cap (tank leak fault)","Fuel trim faults banks 1 & 2: vacuum leak suspected"],amt:26.50},
+ {d:"2012-12-06",mi:201107,o:"murphy",shop:"German MotorWerks",t:"Inspection II",cats:["Service","Inspection"],items:["Oil, fuel filter, cabin + air filter","Spark plugs","Differential and gearbox fluid (Redline 75W-90 / MTL)","Wiper inserts"],note:"Found: torn tie-rod boots, flat spot in P/S rack, rear tyres at wear bars, oil drain-back tube leak, inner fender liners torn.",amt:763.25},
+ {d:"2012-12-10",mi:201199,o:"murphy",shop:"German MotorWerks",t:"Inner fender liners",cats:["Body"],items:["Both inner lower fender liners (curb strike)","Thermo switch"],amt:143.10,conf:"est",note:"Total cut off; computed."},
+ {d:"2013-05-14",mi:206310,o:"murphy",shop:"German MotorWerks",t:"Control arm bushings, door cable",cats:["Suspension","Body"],items:["Lower control arm bushings (torn)","Driver's door inner handle cable"],amt:508.80},
+ {d:"2013-08-27",mi:209377,o:"murphy",shop:"German MotorWerks",t:"A/C compressor",cats:["A/C"],items:["A/C compressor + receiver drier","Evacuate and recharge"],amt:1025.55},
+ {d:"2013-09-17",mi:209728,o:"murphy",shop:"German MotorWerks",t:"Water pump, thermostat, CCV",cats:["Cooling","Engine"],items:["Water pump + thermostat","Crankcase vent valve + breather hoses","Intake manifold gaskets","Main drive belt (cracked)"],note:"Fixed the fuel-trim faults from Nov 2012.",amt:1204.90},
+ {d:"2014-01-14",mi:212357,o:"murphy",shop:"German MotorWerks",t:"Washer pump",cats:["Body"],items:["Washer pump + grommet","Washer hose repaired"],amt:121.53},
+ {d:"2014-02-25",mi:213503,o:"murphy",shop:"German MotorWerks",t:"Oil service",cats:["Service"],items:["Oil + filter, Amsoil 20W-50"],amt:123.23},
+ {d:"2014-04-08",mi:213553,o:"murphy",shop:"German MotorWerks",t:"A/C condenser, water valve",cats:["A/C","Cooling"],items:["A/C condenser + receiver drier, system flush","Heater water valve"],amt:906.72},
+ {d:"2014-05-27",mi:215520,o:"murphy",shop:"German MotorWerks",t:"Coolant bleeder screw",cats:["Cooling"],items:["Broken bleeder screw replaced, system bled"],amt:75.05},
+ {d:"2014-07-24",mi:216519,o:"murphy",shop:"German MotorWerks",t:"A/C evaporator (dash out)",cats:["A/C"],items:["Evaporator + expansion valve","MAF boot"],amt:1914.52},
+ {d:"2014-12-04",mi:218706,o:"murphy",shop:"German MotorWerks",t:"Rear shocks and mounts",cats:["Suspension"],items:["Bilstein B4 rear shocks (originals removed)","Rear upper shock mounts + gaskets"],amt:464.28},
+ {d:"2015-02-02",mi:219861,o:"murphy",shop:"German MotorWerks",t:"Rear subframe reinforcement, P/S rack, coolant pipes",cats:["Chassis","Steering","Cooling"],items:["Left rear subframe mount pulling out of body: reinforcement plates welded in","Remanufactured P/S rack + hoses","Both coolant pipes under the intake","4-wheel alignment"],note:"The most important chassis repair on record for a track E46.",amt:3795.83},
+ {d:"2015-02-24",mi:220482,o:"murphy",shop:"German MotorWerks",t:"Oil service",cats:["Service"],items:["Oil + filter, Amsoil 20W-50"],amt:124.39},
+ {d:"2015-03-23",mi:221139,o:"murphy",shop:"German MotorWerks",t:"Fuel pump (no start, towed)",cats:["Engine"],items:["Fuel pump assembly + fuel filter","Hydraulic belt tensioner + pulley"],amt:861.35},
+ {d:"2015-04-28",mi:222210,o:"murphy",shop:"German MotorWerks",t:"Ignition coil cyl 1",cats:["Engine"],items:["Misfire cylinder 1: ignition coil"],amt:147.66,conf:"est",note:"Total cut off; subtotal $138 + tax."},
+ {d:"2015-09-15",mi:226284,o:"murphy",shop:"German MotorWerks",t:"Valve cover gasket, idler",cats:["Engine"],items:["Valve cover gasket + grommets","A/C belt tensioner + idler pulley"],amt:497.55},
+ {d:"2016-02-10",mi:229409,o:"murphy",shop:"German MotorWerks",t:"Oil service",cats:["Service"],items:["Oil + filter, Amsoil 20W-50"],amt:131.88},
+ {d:"2016-02-19",mi:229571,o:"murphy",shop:"German MotorWerks",t:"Brakes all round, coolant sensor",cats:["Brakes"],items:["Textar pads front + rear, both wear sensors","ATE brake fluid bleed","Coolant level sensor"],amt:689.99},
+ {d:"2016-03-01",mi:230092,o:"murphy",shop:"German MotorWerks",t:"Expansion tank",cats:["Cooling"],items:["Cracked expansion tank replaced"],amt:219.35},
+ {d:"2016-05-16",mi:232358,o:"murphy",shop:"German MotorWerks",t:"Radiator",cats:["Cooling"],items:["Radiator (leak at upper neck)","OE coolant"],amt:532.33},
+ {d:"2016-05-18",mi:232437,o:"murphy",shop:"German MotorWerks",t:"Upper radiator hose",cats:["Cooling"],items:["Upper radiator hose"],amt:71.16},
+ {d:"2016-11-08",mi:237427,o:"murphy",shop:"German MotorWerks",t:"Sway bar end link",cats:["Suspension"],items:["Right front sway bar end link tightened (clunk)"],amt:25.00},
+ {d:"2017-03-20",mi:241010,o:"murphy",shop:"German MotorWerks",t:"Water pump (2nd), radiator hose, door latch",cats:["Cooling","Body","Service"],items:["Water pump + lower radiator hose","Oil service","Washer nozzle + T-connector","Driver's door latch"],amt:1165.62},
+ {d:"2017-08-22",mi:245894,o:"murphy",shop:"German MotorWerks",t:"A/C suction line, secondary air hose",cats:["A/C","Engine"],items:["A/C suction line + recharge","Secondary air hose (DME fault cleared)"],note:"Last invoice under Owner 1.",amt:453.06},
+ {d:"2017-08-28",mi:null,o:"scott",shop:"Pierre's Place, Melbourne",t:"Injectors",cats:["Engine"],items:["Replace injectors / 6 injector seals"],note:"Odometer written ≈245.4k–245.9k (hard to read). First record in Owner 2's name.",amt:184.04,conf:"hand"},
+ {d:"2017-10-20",mi:null,o:"scott",shop:"Strictly Foreign, W Melbourne",t:"Suspension rebuild, Bilstein struts, alignment",cats:["Suspension","Steering","Engine","Wheels & tyres"],items:["Bilstein front strut assemblies 22-103093 / 22-103109","Front strut mounts (Lemförder 31 33 6 752 735), rear shock mounts, strut bellows","Control arm bushing kit","Steering coupler","Spark plugs + ignition coil #6 (old M52 engine)","4× Michelin 205/55R16 tyres","4-wheel alignment"],note:"Invoice #21392, page 2 of 2 (page 1 not supplied). Odometer written as a round 250,000; Carfax had 246,652 a week earlier, so it isn't used as a reading. Paid cash.",amt:3843.39},
+ {d:"2017-11-01",mi:null,o:"scott",shop:"Pierre's Place",t:"Track prep: mounts, struts, shocks, bushings",cats:["Suspension","Drivetrain","Engine"],items:["Engine mounts + transmission mounts","Front struts L/R, rear shocks, camber plates","Rear trailing arm bushings","Oil pan gasket + oil level sensor","Left door check strap; DME code check"],note:"Shop note reads \"OK for track use\".",amt:3137.04,conf:"hand"},
+ {d:"2017-10-03",mi:246452,o:"murphy",shop:"Longwood DMV (Carfax)",t:"Duplicate title issued",cats:["Ownership"],items:["Duplicate title issued ahead of the sale"],amt:null,conf:"cf"},
+ {d:"2017-10-06",mi:246462,o:"murphy",shop:"Fields BMW Winter Park (Carfax)",t:"Right (passenger) airbag replaced",cats:["Safety"],items:["Right airbag assembly replaced (recall work)"],amt:null,conf:"cf"},
+ {d:"2017-10-13",mi:246652,o:"scott",shop:"Melbourne DMV (Carfax)",t:"Sold to Owner 2",cats:["Ownership"],items:["Title transferred to Owner 2 in Melbourne"],note:"Pierre's ticket dated 28 Aug 2017 is already in Owner 2's name, so the sale was likely agreed in late August.",amt:null,conf:"cf"},
+ {d:"2017-11-07",o:"scott",shop:"Tire Kingdom, Melbourne (Carfax)",t:"Alignment",cats:["Suspension"],items:["Alignment performed, battery checked (another visit 29 Dec 2017)"],amt:null,conf:"cf"},
+ {d:"2017-12-13",mi:null,o:"scott",shop:"Pierre's Place",t:"Power steering hoses",cats:["Steering"],items:["P/S hoses + reservoir"],amt:302.26,conf:"hand"},
+ {d:"2018-02-01",mi:null,o:"scott",shop:"Pierre's Place",t:"Vacuum hose, pilot bearing (running tab)",cats:["Engine","Drivetrain"],items:["Vacuum hose","Pilot bearing","Stop-leak"],note:"Ticket used as a payment record: $500 payments dated 27 Jul and 10 Aug 2018. Total not legible.",amt:null,conf:"hand"},
+ {d:"2018-04-25",mi:null,o:"scott",shop:"Pierre's Place",t:"Clutch, flywheel, guibo",cats:["Drivetrain"],items:["Clutch + flywheel (listing: lightweight flywheel, HD clutch)","Rear main seal, input shaft seal","Guibo (flex disc)","Shifter seal/bushings, clutch fork pivot + guide tube"],amt:1344.77,conf:"hand"},
+ {d:"2018-06-18",mi:null,o:"scott",shop:"Pierre's Place",t:"Brake rotors",cats:["Brakes"],items:["2 rotors (parts only)"],amt:66.04,conf:"hand"},
+ {d:"2018-07-02",mi:null,o:"scott",shop:"LKQ Melbourne",t:"Donor engine: M54 3.0 from 2004 330",cats:["Engine swap"],items:["Used M54B30 from a 2004 BMW 330, 118,067 mi, built 07/2003","Donor VIN WBABW534X4PL41967","Includes $100 core"],amt:1551.50},
+ {d:"2018-07-05",mi:null,o:"scott",shop:"Achilles Motorsports",t:"Oil pan baffle",cats:["Engine swap"],items:["Achilles oil pan baffle (M52TU/M54)"],amt:155.45},
+ {d:"2018-07-06",mi:null,o:"scott",shop:"Achilles Motorsports",t:"Rod bearings",cats:["Engine swap"],items:["Achilles coated rod bearing set"],amt:173.25},
+ {d:"2018-07-13",mi:null,o:"scott",shop:"Achilles Motorsports",t:"Upgraded oil pump",cats:["Engine swap"],items:["Achilles upgraded oil pump (M54)"],amt:419.10},
+ {d:"2018-07-13",mi:null,o:"scott",shop:"Trick Pro Motorsports, Palm Bay",t:"Baffle welded into oil pan",cats:["Engine swap"],items:["Oil pan cleaned, stock baffle removed, new baffle welded in"],amt:222.56},
+ {d:"2018-08-15",mi:null,o:"scott",shop:"Pierre's Place",t:"Engine swap installed",cats:["Engine swap","Cooling"],items:["R&R engine assembly","Oil pan, oil filter housing and valve cover gaskets; rear main seal","Rod bearings installed","New water pump, thermostat, heater hoses, coolant pipes","Alternator and starter swapped over","Idle control valve","Headers installed (modified to fit)","Gauges installed"],note:"Labour total; parts were customer-supplied.",amt:2475.00,conf:"hand"},
+ {d:"2018-08-29",mi:null,o:"scott",shop:"Trick Pro Motorsports",t:"Dyno: 215.0 whp / 225.8 lb-ft",cats:["Tuning"],items:["SuperFlow dyno, car weighed 2,790 lb","Peak AFR 14.5"],amt:null,conf:"report"},
+ {d:"2018-09-15",dLabel:"Sep 2018",mi:null,o:"scott",shop:"Pierre's Place",t:"Idle control valve",cats:["Engine"],items:["Idle control valve replaced"],amt:257.30,conf:"hand",note:"Day not written."},
+ {d:"2018-10-16",mi:null,o:"scott",shop:"Tire Rack",t:"Wheels and tyres",cats:["Wheels & tyres"],items:["4× 17×9 ET45 wheels (carbon grey)","4× Bridgestone RE-71R 245/40R17","Lugs, hub rings, 2-yr road hazard"],amt:1451.00},
+ {d:"2018-12-06",mi:null,o:"scott",shop:"ECU Doctors",t:"MS43 ECU",cats:["Tuning"],items:["BMW 330 MS43 ECU, outright purchase"],amt:302.51},
+ {d:"2019-03-21",mi:256894,o:"scott",shop:"Glenn's Complete Automotive",t:"Track alignment",cats:["Suspension"],items:["Front camber −2.7° L / −2.2° R (camber plates, maxed)","Rear camber −1.5° L / −1.7° R","Toe near zero"],amt:null,conf:"report",note:"Cost not shown on the printout."},
+ {d:"2019-06-28",mi:259265,o:"scott",shop:"Pierre's Place",t:"Brakes, ABS, control arm",cats:["Brakes","Suspension"],items:["Brake master cylinder, hoses, rotors, caliper/pads","2 wheel speed sensors; ABS module (sublet $151)","Right control arm","Brake flush; mounted 5 tyres","10W-60 oil, rocker clips"],note:"Paid in instalments Apr–Jun 2019. Odometer partly legible.",amt:1543.56,conf:"hand"},
+ {d:"2019-08-13",mi:null,o:"scott",shop:"Blackstone Laboratories",t:"Oil analysis: healthy",cats:["Service"],items:["Motul 10W-60, 2,000 mi on oil, ≈117k on engine","Wear metals below average; no fuel or coolant"],amt:null,conf:"report"},
+ {d:"2019-11-13",mi:null,o:"scott",shop:"Strictly Foreign, W Melbourne",t:"Rear differential and diff mounts replaced",cats:["Drivetrain"],items:["Replace rear diff and mounts: 6.5 h labour, parts supplied by owner"],note:"Invoice #23597. Most likely when the Turner 3.46 LSD in the listing went in. Odometer written as a round 260,000, not used as a reading. Paid cash.",amt:773.50},
+ {d:"2020-01-21",mi:null,o:"scott",shop:"Pierre's Place",t:"Hood struts",cats:["Body"],items:["2 hood lift supports"],amt:84.66,conf:"hand"},
+ {d:"2019-11-26",o:"bmw",shop:"BMW of North America",t:"Recall 19V-853: driver front airbag inflator",cats:["Safety"],items:["Remedy available. Not shown as completed."],note:"Open. The car now has an NRG wheel; the factory airbags are in the spares box. Ask a BMW dealer how to complete or close it, and don't store a recalled inflator.",amt:null,conf:"cf"},
+ {d:"2020-01-15",o:"bmw",shop:"BMW of North America",t:"Recall 20V-018: passenger front airbag",cats:["Safety"],items:["Remedy available. Not shown as completed."],amt:null,conf:"cf"},
+ {d:"2020-02-13",mi:261262,o:"littlejohn",shop:"Tallahassee DMV (Carfax)",t:"Sold to Owner 3",cats:["Ownership"],items:["Owner 3, Tallahassee"],amt:null,conf:"cf"},
+ {d:"2022-01-28",mi:262781,o:"littlejohn",shop:"Tuning Point Advantage, Tallahassee (Carfax)",t:"Maintenance inspection",cats:["Inspection"],items:["Maintenance inspection"],amt:null,conf:"cf"},
+ {d:"2023-02-17",mi:262905,o:"littlejohn",shop:"Take 5 Oil Change, Tallahassee",t:"Oil service",cats:["Service"],items:["5W-30 full synthetic, 6.9 qt"],note:"Not the 10W-60 the engine ran on in track use.",amt:132.18},
+ {d:"2024-06-07",mi:263256,o:"littlejohn",shop:"Tallahassee Auto & Tire (Carfax)",t:"Left rear axle, A/C compressor",cats:["Drivetrain","A/C"],items:["Left rear axle replaced","A/C compressor replaced, recharged","Maintenance inspection"],amt:null,conf:"cf"},
+ {d:"2024-08-02",mi:263280,o:"littlejohn",shop:"Tallahassee Auto & Tire (Carfax)",t:"A/C recharge",cats:["A/C"],items:["Refrigerant recharged, inspection"],amt:null,conf:"cf"},
+ {d:"2025-04-24",mi:263323,o:"wrencher",shop:"Florida DMV (Carfax)",t:"Sold to Owner 4 (Jason)",cats:["Ownership"],items:["Title issued in Tallahassee 30 Apr 2025","Listed on Cars & Bids as \"wrencher1\"; added ≈1,000 mi during ownership"],amt:null,conf:"cf"},
+ {d:"2026-06",dLabel:"2026",mi:null,o:"wrencher",shop:"Jason (no receipt)",t:"Oil service, brake fluid flush",cats:["Service","Brakes"],items:["Oil + filter","Brake fluid flush"],note:"Reported by Jason, no documentation.",amt:null,conf:"report"},
+ {d:"2026-08-13",mi:264400,o:"wrencher",shop:"Cars & Bids",t:"Cars & Bids auction: $4,000 high bid",cats:["Ownership"],note:"Carfax shows no title change after Apr 2025, and you bought it from Jason, so this auction sale appears not to have gone through.",items:["No reserve, 23 bids, 6,844 views, winning bidder Oxfordsc86","Seller notes SES light P0410 (secondary air removed) and P0443 (purge valve)"],amt:null,conf:"report"},
+ {d:"2026-09-15",dLabel:"Aug–Sep 2026",mi:null,o:"wrencher",shop:"Jason (no receipt)",t:"Fuel tank purge valve replaced",cats:["Engine"],items:["Purge (tank vent) valve replaced after a P0443 code"],note:"Reported by Jason on 2 Oct 2026, no receipt. P0443 was still listed on Cars & Bids in Aug 2026, so it was done after the auction.",amt:null,conf:"report"},
+ {d:"2026-10-01",mi:null,o:"us",shop:"Private sale",t:"Bought by Felipe & Bugsy: $6,500",cats:["Ownership"],items:["Bought from Jason (Owner 4)","Split 50/50: $3,250 each"],note:"Odometer at purchase not recorded yet.",amt:null,conf:"report"},
+ {d:"2026-10-19",mi:null,o:"us",shop:"ASR Performance",t:"Engine oil + filter, brake fluid",cats:["Engine","Brakes"],items:["Engine oil and filter change","Brake fluid service"],note:"$200, paid by Bugsy (in the ledger). Mileage and fluid types not recorded yet.",amt:null,conf:"report"}
+];
+
+const BUILD=[
+ {h:"Engine",items:[["M54B30 from 2004 330, ≈125k mi","yes"],["OEM 330i intake, airbox, throttle body, harness, DME","part"],["Borla headers + dual exhaust","part"],["Shark Injector tune (7,000 rpm, 91+ oct)","no"],["Achilles oil pump","yes"],["Achilles rod bearings","yes"],["Achilles oil pan baffle","yes"],["Low-temp thermostat","part"],["Turner underdrive pulleys","no"],["Secondary air pump + washer tank removed","no"]]},
+ {h:"Drivetrain",items:[["Turner 3.46 LSD (diff swapped Nov 2019)","part"],["Lightweight flywheel","yes"],["Heavy-duty clutch","yes"],["5-speed manual (330)","no"]]},
+ {h:"Suspension & chassis",items:[["Bilstein shocks + struts (front 22-103093/109)","yes"],["Eibach Sportline springs","no"],["Hotchkis sway bars","no"],["Turner front camber plates","yes"],["Megan Racing strut bar","no"],["Rear subframe reinforcement","yes"],["Turner monoball control arm bushings","no"]]},
+ {h:"Brakes, wheels",items:[["OEM 330i front brakes, Hawk HT10 pads","part"],["Bimmerworld brass caliper guides","no"],["19\" Enkei wheels, Continental tyres","no"],["17×9 wheels + RE-71R (2018)","yes"]]},
+ {h:"Interior",items:[["Factory interior removed","no"],["E46 M3 front seats + Schroth harness","no"],["NRG 320mm leather wheel, red stitch (likely ST-012R; listing said Alcantara)","no"],["Short shifter, ZHP knob","no"],["Aluminium door cards","no"],["Fire extinguisher (Bracketeer)","no"],["Coolant temp, oil temp, oil pressure gauges","yes"]]},
+ {h:"Exterior",items:[["Aftermarket grille","no"],["Sunroof deleted, carbon panel","no"],["Carbon-look antenna","no"],["Tow strap","no"],["Decals","no"]]}
+];
+const EXTRAS=["1 key, 1 valet key, 1 uncut key; owner's manual","Set of 17\" Lenso Racing wheels","Turner wheel/hub spacers","Shark Injector OBD-II tuner (and the seller's scanner + cable)","Spare MS43 DME","Factory engine parts: fuel rail, intake manifold, idle control valve","Factory interior parts: door panels, airbags, speakers, rear seats, trim"];
+
+const ISSUES=[
+ ["Rear clunk when rocking a wheel by hand (car off)","You","Silent on the road, no whine, and the LSD locks in burnouts, so the diff looks healthy. Likely normal drivetrain slack being taken up. Check axle nuts and axle-to-flange bolt torque, change the diff fluid and check the drain magnet for metal.","warn"],
+ ["Shifter bearing cup broken: plastic fingers cracked, cup lifting out of its socket","You (photos, 2 Oct 2026)","Replace the shift lever bearing cup with a solid one; check the inner shift boot (torn) and the carrier bushing while it's open. Likely part of the shifter/gearbox movement on lift-off.","crit"],
+ ["Open airbag recalls 19V-853 and 20V-018","Carfax","Free at a BMW dealer. The factory airbags are in the spares box, so ask the dealer how to close the recall; don't keep a recalled inflator in storage.","crit"],
+ ["Stalls coming to a stop unless you blip the throttle","You","Suspects: the recently replaced purge valve (stuck open, wrong part or a loose hose), vacuum leaks, a dirty idle control valve, made worse by the lightweight flywheel. Test the purge valve first: clamp or cap its line to the intake and see if the stalling stops.","crit"],
+ ["Gearbox/shifter moves on lift-off","You","The broken bearing cup explains the slop at the lever. If the gearbox itself still rocks after that, check engine/transmission mounts (Nov 2017) and the guibo (Apr 2018).","warn"],
+ ["Service Engine Soon light on","Seller","P0410: secondary air pump removed. Clears, then returns. Can be coded out in the DME.","info"],
+ ["P0443 purge valve code","Jason","Jason says the purge valve was replaced after Aug 2026. Scan to confirm P0443 is gone, and check the new valve's hoses and connector, since a leaking or stuck-open purge valve can cause the stall at stops.","warn"],
+ ["Washer fluid warning light","Listing","Washer tank was removed.","info"],
+ ["Driver-side rear tail light out","Listing","Bulb or socket.","warn"],
+ ["Passenger front fender liner damaged","Seller","Replace liner.","info"],
+ ["Front strut dust covers worn","Seller","Replace with the next strut/top-mount job.","info"],
+ ["Key remote does not work","Seller","Key battery or key reprogramming.","info"],
+ ["Underbody hardware and strut bar corrosion","Listing","Inspect on a lift, especially the subframe welds from 2015.","warn"],
+ ["2006 left front door damage","Carfax","Check left door gaps, paint and window regulator.","info"],
+ ["Dent in exhaust resonator; dents in rear fender and roof; paint damage","Listing","Cosmetic.","info"]
+];
+const DUE=[
+ ["Engine oil + filter","Oct 2026, ASR Performance","ok","Done. Note the oil used and the mileage for the next interval."],
+ ["Brake fluid","Oct 2026, ASR Performance","ok","Done. Confirm it was a track-grade fluid (e.g. Motul RBF600) before the first track day."],
+ ["Coolant + cooling system check","Aug 2018 (installed with the swap)","warn","8 years on the plastics. Pressure test; check expansion tank, hoses, bleeder."],
+ ["Differential fluid","Diff replaced Nov 2019; no fluid record","crit","Fill and type unknown since the diff swap. LSD-rated 75W-90."],
+ ["Gearbox fluid","Dec 2012","crit","No record since the gearbox swap."],
+ ["Spark plugs","Oct 2017, on the old engine; never on the donor","warn","Replace and read the old ones."],
+ ["CCV / oil separator","Sep 2013 (old engine)","warn","No record on the donor engine; common M54 vacuum leak and idle cause."],
+ ["Engine + transmission mounts","Nov 2017","warn","Ties in with the gearbox movement."],
+ ["Rod bearings","Aug 2018 (≈7k mi ago)","ok","Fine; Blackstone 2019 looked healthy."],
+ ["Subframe welds","Feb 2015","warn","Inspect for cracks before track use."],
+ ["Harness and seat date stamps","Unknown","warn","Check the Schroth harness date; many events require it in date."],
+ ["Fire extinguisher","Unknown","warn","Check the gauge and service date."],
+ ["Tyres","Unknown","warn","Check DOT dates on the 19\" Enkei set and the 17\" Lensos."]
+];
+
+let LEDGER=[
+ {d:"2026-10-01",item:"Car purchase (private sale)",type:"Purchase",paid:"Split",amt:6500,note:"Each paid $3,250"},
+ {d:"2026-10-01",item:"Registration and title",type:"Service",paid:"Bugsy",amt:270},
+ {d:"2026-10-13",item:"OEM door cards, front and rear (sold)",type:"Sale",paid:"Felipe",amt:-295,note:"Felipe received the $295; $147.50 is Bugsy's"},
+ {d:"2026-10-13",item:"AKG Motorsport short shifter, chassis mount",mod:"AKG Motorsport short shifter",type:"Part",paid:"Felipe",amt:300},
+ {d:"2026-10-13",item:"Tail lamps",mod:"Tail lamps + bulbs",type:"Part",paid:"Bugsy",amt:19.50},
+ {d:"2026-10-13",item:"Rear suspension mounts",mod:"Rear suspension mounts",type:"Part",paid:"Felipe",amt:76.33},
+ {d:"2026-10-13",item:"Sparco R383 steering wheel",mod:"Sparco R383 steering wheel",type:"Part",paid:"Felipe",amt:130},
+ {d:"2026-10-14",item:"AKG clutch pedal bushings",mod:"AKG clutch pedal bushings",type:"Part",paid:"Bugsy",amt:23.95},
+ {d:"2026-10-19",item:"Shifter hardware",mod:"AKG Motorsport short shifter",type:"Part",paid:"Felipe",amt:46.95},
+ {d:"2026-10-19",item:"Rear light bulbs",mod:"Tail lamps + bulbs",type:"Part",paid:"Bugsy",amt:29.17,note:"Two purchases: $19.50 + $9.67"},
+ {d:"2026-10-19",item:"Engine oil + filter and brake fluid service (ASR Performance)",type:"Service",paid:"Bugsy",amt:200},
+ {d:"2026-10-19",item:"Sabelt racing bucket seats: first deposit",mod:"Sabelt bucket seats",type:"Deposit",paid:"Bugsy",amt:250,note:"Seats $1,048.20 total with hardware; balance paid 27 Oct"},
+ {d:"2026-10-19",item:"Hazard switch",mod:"Hazard switch",type:"Part",paid:"Bugsy",amt:14.22},
+ {d:"2026-10-20",item:"Trunk badge",mod:"Trunk badge",type:"Part",paid:"Bugsy",amt:25.31},
+ {d:"2026-10-21",item:"BBS CH-R wheels with Michelin all-season performance tires (2024)",mod:"BBS CH-R wheels + Michelin tires",type:"Part",paid:"Split",amt:1400,note:"Each paid $700"},
+ {d:"2026-10-27",item:"Sabelt racing bucket seats (pair): balance, with sliders and mounting brackets",mod:"Sabelt bucket seats",type:"Part",paid:"Bugsy",amt:750,note:"$1,000 for the seats incl. the $250 deposit; $1,048.20 with the seat hardware"},
+ {d:"2026-10-27",item:"Sabelt racing bucket seats: seat hardware",mod:"Sabelt bucket seats",type:"Part",paid:"Felipe",amt:48.20,note:"Brings the seats to $1,048.20 in total"},
+ {d:"2026-11-02",item:"Previous short shifter (came with the car, sold)",type:"Sale",paid:"Felipe",amt:-38.51,note:"Felipe received the $38.51; $19.26 is Bugsy's"}
+];
+let PLANNED=[
+ ["Seat-belt buckle mounting","Bracket for the factory buckle",75.00],
+ ["Airbag resistors + code reset","Seat airbag and occupancy emulators",40.00]
+];
+const SOURCES=[
+ ["German MotorWerks, Longwood","34 invoices","Jan 2010 – Aug 2017","Printed, clean. P. Murphy."],
+ ["Pierre's Place, Melbourne","10 repair orders","Aug 2017 – Jan 2020","Handwritten carbon copies; some totals faint. W. Scott."],
+ ["Strictly Foreign, W Melbourne","2 invoices","Oct 2017, Nov 2019","Printed. Oct 2017 invoice is page 2 of 2."],
+ ["Engine swap parts","LKQ, Achilles ×3, Trick Pro, ECU Doctors","Jul – Dec 2018","Printed."],
+ ["Tire Rack","1 invoice","Oct 2018","Printed."],
+ ["Reports","Dyno sheet, Glenn's alignment, Blackstone oil analysis","2018 – 2019","No costs on these."],
+ ["Take 5 Oil Change","1 receipt (photographed twice)","Feb 2023","J. Littlejohn."],
+ ["Carfax, WBABM5346YJP02514","38 service records, 4 previous owners, 2 recalls","Dec 1999 – Apr 2025","Report run 2 Oct 2026. Clean title."],
+ ["Cars & Bids listing","Description, equipment, flaws, seller comments","Auction ended 13 Aug 2026","Sold for $4,000 at 264,400 mi."],
+ ["First Carfax PDF","Wrong vehicle, not used","—","2001 325Ci WBABN33451JW57072."]
+];
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const fmt=n=>n==null?"—":(n<0?"−":"")+"$"+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const c2=n=>Math.round(n*100+(n>=0?1e-6:-1e-6))/100;
+const fmt0=n=>"$"+Math.round(n).toLocaleString("en-US");
+const mi=n=>n==null?"":n.toLocaleString("en-US")+" mi";
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function dLabel(r){if(r.dLabel)return r.dLabel;const p=r.d.split("-");return (p[2]?+p[2]+" ":"")+MON[+p[1]-1]+" "+p[0]}
+function dNum(d){const p=d.split("-");return +p[0]+((+p[1]||1)-1)/12+((+p[2]||15)-1)/365}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const spendRecs=R.filter(r=>r.amt!=null);
+const total=spendRecs.reduce((a,r)=>a+r.amt,0);
+/* owners */
+$("#owners").innerHTML=["murphy","scott","littlejohn","wrencher","us"].map(k=>`<span class="chip" title="${OWNERS[k].place}"><span class="dot" style="background:${OWNERS[k].color}"></span>${OWNERS[k].short} · ${OWNERS[k].span}</span>`).join("");
+/* mileage chart */
+(function(){
+ const pts=R.filter(r=>r.mi).map(r=>({x:dNum(r.d),y:r.mi,o:r.o,l:dLabel(r)})).sort((a,b)=>a.x-b.x);
+ const W=560,H=260,L=56,Rr=14,T=14,B=30,x0=1999.5,x1=2027,y0=0,y1=280000;
+ const sx=x=>L+(x-x0)/(x1-x0)*(W-L-Rr), sy=y=>T+(1-(y-y0)/(y1-y0))*(H-T-B);
+ let s="";
+ for(let y=y0;y<=y1;y+=40000){s+=`<line class="grid" x1="${L}" x2="${W-Rr}" y1="${sy(y)}" y2="${sy(y)}"/><text x="${L-6}" y="${sy(y)+3.5}" text-anchor="end">${y?y/1000+"k":"0"}</text>`}
+ for(let x=2000;x<=2026;x+=4){s+=`<text x="${sx(x)}" y="${H-10}" text-anchor="middle">${x}</text>`}
+ const path=pts.map((p,i)=>(i?"L":"M")+sx(p.x).toFixed(1)+","+sy(p.y).toFixed(1)).join("");
+ const area=path+`L${sx(pts.at(-1).x).toFixed(1)},${sy(y0)}L${sx(pts[0].x).toFixed(1)},${sy(y0)}Z`;
+ s+=`<path d="${area}" fill="var(--fern)" opacity=".10"/><path d="${path}" fill="none" stroke="var(--fern)" stroke-width="2"/>`;
+ pts.forEach((p,i)=>{const last=i===pts.length-1;s+=`<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="${last?5:3.2}" fill="${OWNERS[p.o].color}" stroke="var(--surface)" stroke-width="1.5"><title>${p.l}: ${p.y.toLocaleString()} mi</title></circle>`});
+ const sw=sx(2018.55);s+=`<line x1="${sw}" x2="${sw}" y1="${T}" y2="${H-B}" stroke="var(--faint)" stroke-dasharray="3 3"/><text x="${sw+5}" y="${T+10}">M54 swap</text>`;
+ const lp=pts.at(-1);s+=`<text x="${sx(lp.x)-8}" y="${sy(lp.y)-10}" text-anchor="end" style="fill:var(--fg)">264,400</text>`;
+ $("#chart-miles").innerHTML=s;
+ const used=[...new Set(pts.map(p=>p.o))];
+ $("#legend-miles").innerHTML=used.map(k=>`<span><i style="background:${OWNERS[k].color}"></i>${OWNERS[k].name}</span>`).join("");
+})();
+
+/* spend chart */
+(function(){
+ const by={};spendRecs.forEach(r=>{const y=r.d.slice(0,4);by[y]=(by[y]||0)+r.amt});
+ const years=[];for(let y=2010;y<=2023;y++)years.push(String(y));
+ const W=560,H=260,L=48,Rr=10,T=18,B=30,max=10000;
+ const bw=(W-L-Rr)/years.length;const sy=v=>T+(1-v/max)*(H-T-B);
+ let s="";for(let v=0;v<=max;v+=2000){s+=`<line class="grid" x1="${L}" x2="${W-Rr}" y1="${sy(v)}" y2="${sy(v)}"/><text x="${L-6}" y="${sy(v)+3.5}" text-anchor="end">${v?("$"+v/1000+"k"):"$0"}</text>`}
+ years.forEach((y,i)=>{const v=by[y]||0;const x=L+i*bw+bw*.18,w=bw*.64;const col=+y>=2017?(+y===2018?"var(--fern)":"color-mix(in srgb,var(--fern) 55%,var(--surface))"):"color-mix(in srgb,var(--fern) 55%,var(--surface))";
+  if(v)s+=`<rect x="${x.toFixed(1)}" y="${sy(v).toFixed(1)}" width="${w.toFixed(1)}" height="${(sy(0)-sy(v)).toFixed(1)}" rx="2" fill="${col}"><title>${y}: ${fmt(v)}</title></rect>`;
+  if(v>=2500)s+=`<text x="${(x+w/2).toFixed(1)}" y="${(sy(v)-5).toFixed(1)}" text-anchor="middle">${(v/1000).toFixed(1)}k</text>`;
+  s+=`<text x="${(L+i*bw+bw/2).toFixed(1)}" y="${H-10}" text-anchor="middle">${"’"+y.slice(2)}</text>`});
+ $("#chart-spend").innerHTML=s;
+})();
+
+/* annual miles */
+(function(){
+ const P=[["2000–2003 (Owner 1)","1999-12-30",6,"2003-07-21",73964],["2003–2009 (Owner 1)","2003-07-21",73964,"2009-10-01",166783],["2009–2012 (Owner 1)","2009-10-01",166783,"2012-12-10",201199],["2013–2017 (Owner 1)","2012-12-10",201199,"2017-08-22",245894],["2017–2020 (Owner 2, incl. swap)","2017-08-22",245894,"2020-02-13",261262],["2020–2025 (Owner 3)","2020-02-13",261262,"2025-04-24",263323],["2025–2026 (Owner 4)","2025-04-24",263323,"2026-08-13",264400]];
+ $("#tbl-annual tbody").innerHTML=P.map(p=>{const yrs=dNum(p[3])-dNum(p[1]);const rate=(p[4]-p[2])/yrs;return `<tr><td>${p[0]}</td><td class="r num">${p[2].toLocaleString()}</td><td class="r num">${p[4].toLocaleString()}</td><td class="r num">${Math.round(rate/100)*100>=1000?(Math.round(rate/100)*100).toLocaleString():Math.round(rate).toLocaleString()}</td></tr>`}).join("");
+})();
+
+/* categories */
+(function(){
+ const by={};spendRecs.forEach(r=>{const c=r.cats[0];by[c]=by[c]||{n:0,v:0};by[c].n++;by[c].v+=r.amt});
+ const rows=Object.entries(by).sort((a,b)=>b[1].v-a[1].v);
+ $("#tbl-cats tbody").innerHTML=rows.map(([c,o])=>`<tr><td>${c}</td><td class="r num">${o.n}</td><td class="r num">${fmt0(o.v)}</td><td style="width:34%"><div style="height:8px;border-radius:4px;background:var(--surface-2)"><div style="height:8px;border-radius:4px;background:var(--fern);width:${(o.v/rows[0][1].v*100).toFixed(1)}%"></div></div></td></tr>`).join("")+`<tr><td><b>Total</b></td><td class="r num"><b>${spendRecs.length}</b></td><td class="r num"><b>${fmt0(total)}</b></td><td></td></tr>`;
+})();
+
+/* findings */
+$("#findings").innerHTML=[
+ ["p-ok","Chassis","Rear subframe reinforcement was welded in Feb 2015 at 219,861 mi, the classic E46 track failure point. Worth inspecting the welds."],
+ ["p-ok","Engine","Donor M54 had 118k mi in Jul 2018 and got Achilles rod bearings, oil pump and baffle before going in. 2019 oil analysis was healthy."],
+ ["p-warn","Idle","The listing confirms a lightweight flywheel and a removed secondary air pump. Both fit the stall-at-stop you noticed."],
+ ["p-warn","Fluids","No receipt for diff or gearbox fluid since Dec 2012, and none for coolant since the 2018 swap. Treat all as due."],
+ ["p-warn","Cooling","Cooling parts were renewed repeatedly (water pumps 2013, 2017, 2018; radiator 2016; tank 2016). The current set is from Aug 2018."],
+ ["p-info","Mileage","Readings climb steadily from 6 mi in 1999; Carfax finds no rollback. ≈14k mi/yr as a daily driver, ≈450 mi/yr since 2020."],
+ ["p-ok","Title","Clean Florida title, no total loss, no structural damage, no airbag deployment. One damage report in Jul 2006 (left front door, mirror, window regulator)."],
+ ["p-info","Value","It reached $4,000 at a no-reserve Cars & Bids auction on 13 Aug 2026. You bought it from Jason on 1 Oct 2026 for $6,500."],
+ ["p-crit","Recalls","Two open airbag recalls: 19V-853 (driver inflator) and 20V-018 (passenger). The passenger bag was replaced in Oct 2017, but Carfax still lists both as open."]
+].map(f=>`<tr><td style="width:1%"><span class="pill ${f[0]}">${f[1]}</span></td><td>${f[2]}</td></tr>`).join("");
+
+/* timeline */
+(function(){
+ const cats=[...new Set(R.flatMap(r=>r.cats))].sort();
+ $("#f-cat").innerHTML=`<option value="">All systems</option>`+cats.map(c=>`<option>${esc(c)}</option>`).join("");
+ const ok=["murphy","scott","littlejohn","wrencher","us","bmw"].filter(k=>R.some(r=>r.o===k));
+ $("#f-owner").innerHTML=`<option value="">All owners</option>`+ok.map(k=>`<option value="${k}">${OWNERS[k].name}</option>`).join("");
+ function clear(){$("#q").value="";$("#f-owner").value="";$("#f-cat").value="";render();$("#q").focus()}
+ function render(){
+  const q=$("#q").value.trim().toLowerCase(),o=$("#f-owner").value,c=$("#f-cat").value,ord=$("#f-order").value;
+  $("#f-clear").hidden=!(q||o||c);
+  let list=R.filter(r=>(!o||r.o===o)&&(!c||r.cats.includes(c))&&(!q||[r.t,r.shop,r.note||"",...r.items].join(" ").toLowerCase().includes(q)));
+  list=list.slice().sort((a,b)=>dNum(a.d)-dNum(b.d));if(ord==="desc")list.reverse();
+  const sum=list.reduce((a,r)=>a+(r.amt||0),0);
+  $("#count").textContent=`${list.length} of ${R.length} records · ${fmt0(sum)}`;
+  let html="",yr="";
+  const yearSum={};list.forEach(r=>{const y=r.d.slice(0,4);yearSum[y]=(yearSum[y]||0)+(r.amt||0)});
+  list.forEach(r=>{const y=r.d.slice(0,4);if(y!==yr){yr=y;html+=`<div class="year" id="yr-${y}">${y}<span>${yearSum[y]?fmt0(yearSum[y]):""}</span></div>`}
+   const flags=r.conf==="hand"?`<span class="flag" title="Handwritten; best read">≈ handwritten</span>`:r.conf==="est"?`<span class="flag" title="Computed">≈ computed</span>`:r.conf==="report"?`<span class="flag info">record, no invoice</span>`:r.conf==="cf"?`<span class="flag info">Carfax</span>`:"";
+   html+=`<article class="entry" style="--oc:${OWNERS[r.o].color}">
+    <div class="d"><b>${dLabel(r)}</b>${r.mi?mi(r.mi):""}</div>
+    <div><h3>${esc(r.t)}</h3><div class="meta"><span>${esc(r.shop)}</span><span>· ${OWNERS[r.o].name}</span></div>
+     <ul>${r.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>${r.note?`<div class="note">${esc(r.note)}</div>`:""}
+     <div class="cats">${r.cats.map(x=>`<span class="cat">${esc(x)}</span>`).join("")}${flags}</div></div>
+    <div class="amt${r.amt==null?" none":""}">${r.amt!=null?fmt(r.amt):"—"}</div></article>`});
+  $("#entries").innerHTML=html||`<div class="empty"><p style="margin:0 0 8px">No records match these filters.</p><button class="btn" type="button" id="f-clear2">${svgI("x")}Clear filters</button></div>`;
+  const c2b=$("#f-clear2");if(c2b)c2b.addEventListener("click",clear);
+  const ys=[...new Set(list.map(r=>r.d.slice(0,4)))];
+  $("#years").innerHTML=ys.length>3?ys.map(y=>`<button type="button" data-y="${y}">${y}</button>`).join(""):"";
+ }
+ $("#years").addEventListener("click",e=>{const b=e.target.closest("[data-y]");if(!b)return;const el=document.getElementById("yr-"+b.dataset.y);if(el)el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"})});
+ $("#f-clear").addEventListener("click",clear);
+ ["#q","#f-owner","#f-cat","#f-order"].forEach(s=>$(s).addEventListener("input",render));render();
+})();
+
+/* build sheet */
+const EVL={yes:["Invoice","ev yes"],part:["Partly on invoice","ev"],no:["Seller only","ev"]};
+$("#buildsheet").innerHTML=BUILD.map(g=>`<div class="card"><h3>${g.h}</h3><ul>${g.items.map(i=>`<li><span>${esc(i[0])}</span><span class="${EVL[i[1]][1]}">${EVL[i[1]][0]}</span></li>`).join("")}</ul></div>`).join("");
+$("#extras").innerHTML=EXTRAS.map(e=>`<li>${esc(e)}</li>`).join("");
+
+/* issues + due */
+const PL={crit:["Urgent","p-crit"],warn:["Soon","p-warn"],info:["Low","p-info"],ok:["OK","p-ok"]};
+const DL={crit:["Overdue / unknown","p-crit"],warn:["Check","p-warn"],ok:["Done","p-ok"]};
+const RANK={crit:0,warn:1,info:2,ok:3};
+const openCrit=ISSUES.filter(i=>i[3]==="crit").length+DUE.filter(d=>d[2]==="crit").length;
+const dueOk=DUE.filter(d=>d[2]==="ok").length;
+function segment(el,opts,onPick){
+ let cur=opts[0].v;
+ const draw=()=>{el.innerHTML=opts.map(o=>`<button type="button" aria-pressed="${o.v===cur}" data-v="${o.v}">${o.l}<b>${o.n}</b></button>`).join("")};
+ el.addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;cur=b.dataset.v;draw();onPick(cur)});
+ draw();onPick(cur);
+}
+(function(){
+ const list=ISSUES.map(i=>({t:i[0],src:i[1],n:i[2],p:i[3]})).sort((a,b)=>RANK[a.p]-RANK[b.p]);
+ const cnt=p=>list.filter(x=>x.p===p).length;
+ segment($("#iss-seg"),[{v:"all",l:"All",n:list.length},{v:"crit",l:"Urgent",n:cnt("crit")},{v:"warn",l:"Soon",n:cnt("warn")},{v:"info",l:"Low",n:cnt("info")}],v=>{
+  $("#iss-list").innerHTML=list.filter(x=>v==="all"||x.p===v).map(x=>`<li><span class="pill ${PL[x.p][1]}">${PL[x.p][0]}</span><div><div class="t">${esc(x.t)}</div><div class="src">Source: ${esc(x.src)}</div><div class="n">${esc(x.n)}</div></div></li>`).join("");
+ });
+ const due=DUE.map(d=>({t:d[0],last:d[1],s:d[2],n:d[3]})).sort((a,b)=>RANK[a.s]-RANK[b.s]);
+ const dc=s=>due.filter(x=>x.s===s).length;
+ segment($("#due-seg"),[{v:"all",l:"All",n:due.length},{v:"crit",l:"Overdue",n:dc("crit")},{v:"warn",l:"Check",n:dc("warn")},{v:"ok",l:"Done",n:dc("ok")}],v=>{
+  $("#due-list").innerHTML=due.filter(x=>v==="all"||x.s===v).map(x=>`<li><span class="pill ${DL[x.s][1]}">${DL[x.s][0]}</span><div><div class="t">${esc(x.t)}</div><div class="src">Last documented: ${esc(x.last)}</div><div class="n">${esc(x.n)}</div></div></li>`).join("");
+ });
+ const pct=Math.round(dueOk/DUE.length*100);
+ ["#due","#rd"].forEach(p=>{$(p+"-prog-l").textContent=`${dueOk} of ${DUE.length} baseline items done`;const b=$(p+"-bar");b.setAttribute("aria-valuenow",pct);b.setAttribute("aria-valuemin",0);b.setAttribute("aria-valuemax",100);b.querySelector("i").style.width=pct+"%"});
+})();
+
+/* ledger */
+function renderLedger(){
+ let F=0,Bg=0,tot=0,fPaid=0,bPaid=0;
+ const rows=LEDGER.map(l=>{const half=l.amt/2;F+=half;Bg+=half;tot+=l.amt;if(l.paid==="Felipe")fPaid+=l.amt;else if(l.paid==="Bugsy")bPaid+=l.amt;else{fPaid+=half;bPaid+=half}
+  return `<tr><td class="num">${l.d}</td><td>${esc(l.item)}${l.note?`<div style="color:var(--muted);font-size:12.5px">${esc(l.note)}</div>`:""}</td><td>${l.type}</td><td>${l.type==="Sale"?(l.paid==="Split"?"Split":"Received by "+l.paid):l.paid}</td><td class="r num">${fmt(l.amt)}</td><td class="r num">${fmt(half)}</td><td class="r num">${fmt(half)}</td><td class="act">${l.id?`<button class="ibtn" type="button" data-edit="${l.id}" aria-label="Edit ${esc(l.item)}" title="Edit">${svgI("pencil")}</button>`:""}</td></tr>`}).join("");
+ $("#tbl-ledger tbody").innerHTML=rows;
+ $("#tbl-ledger tfoot").innerHTML=`<tr><td></td><td>Total</td><td></td><td></td><td class="r num">${fmt(tot)}</td><td class="r num">${fmt(F)}</td><td class="r num">${fmt(Bg)}</td><td class="act"></td></tr>`;
+ const bal=fPaid-F;
+ const P={Felipe:{paid:0,kept:0},Bugsy:{paid:0,kept:0}};
+ LEDGER.forEach(l=>{const w=l.paid==="Split"?[["Felipe",l.amt/2],["Bugsy",l.amt/2]]:[[l.paid,l.amt]];
+  w.forEach(([who,a])=>{if(!P[who])return;if(a>=0)P[who].paid+=a;else P[who].kept+=-a;})});
+ $("#tbl-owe tbody").innerHTML=["Felipe","Bugsy"].map(who=>{const x=P[who],net=x.paid-x.kept,b=net-tot/2;
+  return `<tr><td>${who}</td><td class="r num">${fmt(x.paid)}</td><td class="r num">${x.kept?"−"+fmt(x.kept):fmt(0)}</td><td class="r num">${fmt(net)}</td><td class="r num">${fmt(tot/2)}</td><td class="r num" style="color:${Math.abs(b)<0.005?"inherit":(b>0?"var(--ok)":"var(--crit)")}">${Math.abs(b)<0.005?"Even":(b>0?"Owed ":"Owes ")+fmt(c2(Math.abs(b)))}</td></tr>`}).join("");
+ $("#owe-line").textContent=Math.abs(bal)<0.005?"You're even — nobody owes anything.":(bal>0?`Bugsy owes Felipe ${fmt(c2(Math.abs(bal)))}.`:`Felipe owes Bugsy ${fmt(c2(Math.abs(bal)))}.`);
+ $("#ledger-sum").innerHTML=`<div class="tile"><div class="k">Total invested</div><div class="v">${fmt0(tot)}</div><div class="s">purchase + parts − sales</div></div>
+  <div class="tile"><div class="k">Each owner's share</div><div class="v">${fmt0(F)}</div><div class="s">Felipe ${fmt0(F)} · Bugsy ${fmt0(Bg)}</div></div>
+  <div class="tile"><div class="k">Who owes whom</div><div class="v">${Math.abs(bal)<0.005?"Even":fmt(c2(Math.abs(bal)))}</div><div class="s">${Math.abs(bal)<0.005?"Nothing owed":(bal>0?"Bugsy owes Felipe":"Felipe owes Bugsy")}</div></div>`;
+window.LS={tot,bal};
+ let pt=0;$("#tbl-planned tbody").innerHTML=PLANNED.map(p=>{pt+=p[2]||0;return `<tr><td>${esc(p[0])}</td><td>${esc(p[1])}</td><td class="r num">${fmt(p[2])}</td><td class="r num">${fmt(p[2]==null?null:p[2]/2)}</td><td class="act">${p[3]?`<button class="ibtn" type="button" data-edit-planned="${p[3]}" aria-label="Edit ${esc(p[0])}" title="Edit">${svgI("pencil")}</button>`:""}</td></tr>`}).join("")+`<tr><td><b>Total if bought</b></td><td></td><td class="r num"><b>${fmt(pt)}</b></td><td class="r num"><b>${fmt(pt/2)}</b></td><td class="act"></td></tr>`;
+}
+renderLedger();
+/* upgrades + sold (built from the ledger) */
+function renderUpgrades(){
+ const row=(l,amt)=>`<tr><td class="num">${l.d}</td><td>${esc(l.item)}${l.note?`<div style="color:var(--muted);font-size:12.5px">${esc(l.note)}</div>`:""}</td><td>${l.paid==="Split"?"Split 50/50":l.paid}</td><td class="r num">${fmt(amt)}</td><td class="r num">${fmt(amt/2)}</td><td class="act">${l.id?`<button class="ibtn" type="button" data-edit="${l.id}" aria-label="Edit ${esc(l.item)}" title="Edit">${svgI("pencil")}</button>`:""}</td></tr>`;
+ const U=LEDGER.filter(l=>l.type==="Part"||l.type==="Deposit");
+ const G=[];U.forEach(l=>{const k=l.mod||l.item;let g=G.find(x=>x.k===k);if(!g){g={k,d:l.d,amt:0,F:0,B:0};G.push(g)}
+  g.amt+=l.amt;if(l.paid==="Felipe")g.F+=l.amt;else if(l.paid==="Bugsy")g.B+=l.amt;else{g.F+=l.amt/2;g.B+=l.amt/2}});
+ const ut=G.reduce((a,g)=>a+g.amt,0),uf=G.reduce((a,g)=>a+g.F,0);
+ const who=g=>g.F&&g.B?(Math.abs(g.F-g.B)<0.005?"Split 50/50":`Felipe ${fmt(g.F)} · Bugsy ${fmt(g.B)}`):(g.F?"Felipe":"Bugsy");
+ $("#tbl-upg tbody").innerHTML=G.map(g=>`<tr><td class="num">${g.d}</td><td>${esc(g.k)}</td><td>${who(g)}</td><td class="r num">${fmt(g.amt)}</td><td class="r num">${fmt(g.amt/2)}</td></tr>`).join("")||`<tr><td colspan="5" style="color:var(--muted)">No mods yet.</td></tr>`;
+ $("#tbl-upg tfoot").innerHTML=`<tr><td></td><td>Total</td><td></td><td class="r num">${fmt(ut)}</td><td class="r num">${fmt(ut/2)}</td></tr>`;
+ $("#upg-sum").innerHTML=`<div class="tile"><div class="k">Spent on mods</div><div class="v">${fmt0(ut)}</div><div class="s">${G.length} mods</div></div>
+  <div class="tile"><div class="k">Paid by Felipe</div><div class="v">${fmt0(uf)}</div><div class="s">incl. half of split items</div></div>
+  <div class="tile"><div class="k">Paid by Bugsy</div><div class="v">${fmt0(ut-uf)}</div><div class="s">incl. half of split items</div></div>`;
+window.US={mods:G.length};
+ const S=LEDGER.filter(l=>l.type==="Sale");
+ const st=S.reduce((a,l)=>a-l.amt,0);
+ US.sold=S.length;$("#tbl-sold tbody").innerHTML=S.map(l=>row(l,-l.amt)).join("")||`<tr><td colspan="6" style="color:var(--muted)">Nothing sold yet.</td></tr>`;
+ $("#tbl-sold tfoot").innerHTML=`<tr><td></td><td>Total</td><td></td><td class="r num">${fmt(st)}</td><td class="r num">${fmt(st/2)}</td><td class="act"></td></tr>`;
+ $("#sold-sum").innerHTML=`<div class="tile"><div class="k">Total from sales</div><div class="v">${fmt0(st)}</div><div class="s">${S.length} item${S.length===1?"":"s"} sold</div></div>
+  <div class="tile"><div class="k">Each owner's half</div><div class="v">${fmt0(st/2)}</div><div class="s">split 50/50</div></div>
+  <div class="tile"><div class="k">Net mod cost</div><div class="v">${fmt0(ut-st)}</div><div class="s">mods minus sales</div></div>`;
+}
+renderUpgrades();
+/* mileage counters */
+(function(){
+ const pts=R.filter(r=>r.mi&&r.mi>100).map(r=>[dNum(r.d),r.mi]).sort((a,b)=>a[0]-b[0]);
+ function at(d){const x=dNum(d);for(let i=1;i<pts.length;i++){if(x<=pts[i][0]){const[a,b]=[pts[i-1],pts[i]];if(x===b[0])return {v:b[1],est:false};return {v:Math.round((a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0]))/100)*100,est:true}}}return {v:pts.at(-1)[1],est:true}}
+ const SWAP="2018-08-15",DONOR=118067,swapAt=at(SWAP).v;
+ const P=[
+  ["Engine block (M54 donor)",SWAP,"Pierre's / LKQ","engine"],
+  ["Rod bearings, oil pump, oil pan baffle",SWAP,"Achilles / Trick Pro"],
+  ["Water pump, thermostat, heater hoses, coolant pipes",SWAP,"Pierre's Place"],
+  ["Headers",SWAP,"Pierre's Place"],
+  ["Idle control valve","2018-09-15","Pierre's Place"],
+  ["Clutch, lightweight flywheel, guibo, rear main seal","2018-04-25","Pierre's Place"],
+  ["Engine + transmission mounts","2017-11-01","Pierre's Place"],
+  ["Front struts, rear shocks, camber plates","2017-11-01","Pierre's Place"],
+  ["Rear trailing arm bushings","2017-11-01","Pierre's Place"],
+  ["P/S hoses + reservoir","2017-12-13","Pierre's Place"],
+  ["Rear diff (likely Turner 3.46 LSD) + diff mounts","2019-11-13","Strictly Foreign"],
+  ["Bilstein front struts, strut mounts, control arm bushings, steering coupler","2017-10-20","Strictly Foreign"],
+  ["Brake master cylinder, rotors, caliper/pads, right control arm","2019-06-28","Pierre's Place"],
+  ["Left rear axle","2024-06-07","Carfax"],
+  ["A/C compressor","2024-06-07","Carfax"],
+  ["Rear subframe reinforcement","2015-02-02","German MotorWerks"],
+  ["Remanufactured P/S rack","2015-02-02","German MotorWerks"],
+  ["Purge valve","2026-09-15","Jason (no receipt)"]
+ ];
+ function draw(){
+  let now=parseInt($("#odo-now").value,10);if(!(now>=264400))now=264400;
+  const since=now-swapAt;
+  $("#c-chassis").textContent=now.toLocaleString();$("#t-miles").textContent=now.toLocaleString();
+  $("#c-engine").textContent="≈"+(DONOR+since).toLocaleString();
+  $("#c-swap").textContent="≈"+since.toLocaleString();
+  $("#c-swap-s").textContent=`chassis ≈${swapAt.toLocaleString()} at the swap (estimate)`;
+  $("#tbl-parts tbody").innerHTML=P.map(p=>{const a=at(p[1]);const fit=p[3]==="engine"?swapAt:Math.min(a.v,now);const on=p[3]==="engine"?DONOR+(now-swapAt):now-fit;
+   const r={d:p[1]};if(p[1]==="2018-09-15")r.dLabel="Sep 2018";if(p[1]==="2026-09-15")r.dLabel="Aug–Sep 2026";
+   return `<tr><td>${esc(p[0])}</td><td class="num">${dLabel(r)}</td><td class="r num">${a.est?"≈":""}${fit.toLocaleString()}</td><td class="r num">${(p[3]==="engine"||a.est)?"≈":""}${on.toLocaleString()}</td><td>${esc(p[2])}</td></tr>`}).join("");
+ }
+ $("#odo-now").addEventListener("input",draw);draw();
+})();
+/* car map */
+(function(){
+ const Z=[
+  {id:"cooling",name:"Radiator & cooling",x:78,y:196,re:/radiator|coolant|water pump|thermostat|expansion tank|bleeder|heater|water pipe|water valve|coolant pipe|thermo switch/i,cats:["Cooling"]},
+  {id:"engine",name:"Engine",x:200,y:150,re:/engine|oil(?! level sensor)|valve cover|vanos|injector|coil|spark|ccv|crankcase|breather|intake|throttle|idle|fuel trim|gas cap|rod bearing|baffle|header|tensioner|idler|drive belt|main drive belt|pulley|secondary air|maf|air mass|dyno|ecu|dme|tune|emissions|misfire|oil pressure/i,cats:["Engine","Engine swap","Tuning"]},
+  {id:"ac",name:"A/C & climate",x:280,y:112,re:/a\/c|evaporator|condens|compressor|refrigerant|blower|receiver drier|expansion valve|suction line/i,cats:["A/C"]},
+  {id:"frontsus",name:"Front suspension & steering",x:185,y:178,re:/strut|camber|control arm|tie.?rod|p\/s|power steering|steering|sway bar|alignment|front.*bushing/i,cats:["Steering"]},
+  {id:"brakes",name:"Brakes",x:185,y:232,re:/brake|rotor|pads?\b|caliper|master cylinder|abs|speed sensor/i,cats:["Brakes"]},
+  {id:"trans",name:"Clutch & gearbox",x:345,y:236,re:/clutch|flywheel|gearbox|transmission|shift|pilot bearing|input shaft|guibo|trans mount|rear main seal/i,cats:[]},
+  {id:"fuel",name:"Fuel system",x:470,y:236,re:/fuel pump|fuel filter|gas cap|purge|tank leak/i,cats:[]},
+  {id:"diff",name:"Diff & axles",x:548,y:212,re:/diff|axle|lsd/i,cats:[]},
+  {id:"rearsus",name:"Rear suspension & subframe",x:600,y:176,re:/subframe|rear shock|shock mount|trailing arm|rear.*camber|rear upper/i,cats:["Chassis"]},
+  {id:"wheels",name:"Wheels & tyres",x:600,y:232,re:/tyre|tire|wheel(?! bearing)|rims?\b/i,cats:["Wheels & tyres"]},
+  {id:"electrical",name:"Battery & electrical (trunk)",x:676,y:146,re:/battery|fuse|horn|bulb|turn signal|light|speaker|charging/i,cats:["Electrical"]},
+  {id:"cabin",name:"Interior & safety",x:420,y:108,re:/airbag|seat|harness|gauge|wiper|cabin filter|recall/i,cats:["Safety"]},
+  {id:"body",name:"Body & doors",x:384,y:182,re:/door|window|mirror|fender liner|roundel|reflector|washer|hood|damage|emblem|grille/i,cats:["Body"]}
+ ];
+ const skip=r=>r.cats.includes("Ownership")||r.cats.includes("Inspection")&&!/found/i.test(r.note||"");
+ const recs=Z.map(z=>({z,list:R.filter(r=>{if(r.cats.includes("Ownership"))return false;const txt=[r.t,...r.items].join(" ");return z.re.test(txt)||z.cats.some(c=>r.cats[0]===c)}).sort((a,b)=>dNum(a.d)-dNum(b.d))}));
+ const g=document.getElementById("hotspots");
+ g.innerHTML=recs.map(({z,list})=>`<g class="hot${list.length?"":" empty"}" tabindex="0" role="button" aria-pressed="false" data-z="${z.id}" aria-label="${z.name}: ${list.length} records"><circle class="halo" cx="${z.x}" cy="${z.y}" r="22"/><circle class="ring" cx="${z.x}" cy="${z.y}" r="13"/><text x="${z.x}" y="${z.y}">${list.length}</text><title>${z.name}</title></g>`).join("");
+ $("#zones").innerHTML=recs.map(({z,list})=>`<button class="zbtn" type="button" aria-pressed="false" data-z="${z.id}">${z.name}<b>${list.length}</b></button>`).join("");
+ function pick(id){
+  const {z,list}=recs.find(x=>x.z.id===id);
+  document.querySelectorAll("[data-z]").forEach(el=>el.setAttribute("aria-pressed",el.dataset.z===id));
+  const spend=list.reduce((a,r)=>a+(r.amt||0),0);const last=list.filter(r=>r.d<"2026-07").at(-1);
+  $("#zonepanel").innerHTML=`<div class="zone-head"><h2>${z.name}</h2><span style="color:var(--muted);font-size:13px">${list.length} records</span></div>
+   <div class="zone-stats"><div><div class="k">Records</div><div class="v">${list.length}</div></div><div><div class="k">Spend</div><div class="v">${fmt0(spend)}</div></div><div><div class="k">Last work</div><div class="v">${last?dLabel(last):"—"}</div></div></div>
+   <ul class="zlist">${list.map(r=>`<li style="--oc:${OWNERS[r.o].color}"><div class="top"><span>${dLabel(r)}${r.mi?" · "+mi(r.mi):""}</span><span class="num">${r.amt!=null?fmt(r.amt):""}</span></div><div class="t">${esc(r.t)}</div><div class="it">${esc(r.items.join(" · "))}</div><div class="it" style="margin-top:2px">${esc(r.shop)} · ${OWNERS[r.o].short}</div></li>`).join("")||"<li>No records for this area yet.</li>"}</ul>`;
+  try{localStorage.setItem("e46zone",id)}catch(e){}
+ }
+ document.querySelectorAll("[data-z]").forEach(el=>{el.addEventListener("click",()=>pick(el.dataset.z));el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(el.dataset.z)}})});
+ let start="engine";try{const v=localStorage.getItem("e46zone");if(v&&Z.some(z=>z.id===v))start=v}catch(e){}
+ pick(start);
+})();
+/* sources */
+$("#tbl-sources tbody").innerHTML=SOURCES.map(s=>`<tr><td>${esc(s[0])}</td><td>${esc(s[1])}</td><td>${esc(s[2])}</td><td>${esc(s[3])}</td></tr>`).join("");
+
+/* overview: tiles, readiness, latest, history summary */
+function renderOverviewMoney(){
+ const {tot,bal}=LS;
+ $("#t-urgent").textContent=openCrit;
+ $("#t-urgent-s").textContent=`${ISSUES.length} open issues · ${DUE.length-dueOk} service items`;
+ $("#t-bal").textContent=Math.abs(bal)<0.005?"Even":fmt(c2(Math.abs(bal)));
+ $("#t-bal-s").textContent=Math.abs(bal)<0.005?"nothing owed":(bal>0?"Bugsy owes Felipe":"Felipe owes Bugsy");
+ $("#t-inv").textContent=fmt0(tot);
+ $("#t-inv-s").textContent=`${fmt0(tot/2)} each · purchase + parts − sales`;
+ const urgent=[...ISSUES.filter(i=>i[3]==="crit").map(i=>[i[0],i[2]]),...DUE.filter(d=>d[2]==="crit").map(d=>[d[0]+": no recent record",d[3]])];
+ $("#rd-n").textContent=urgent.length;
+ $("#rd-n").classList.toggle("ok",urgent.length===0);
+ $("#rd-lede").textContent=urgent.length?`urgent item${urgent.length===1?"":"s"} to sort before the car goes on track.`:"Nothing urgent. Check the remaining service items.";
+ const first=s=>{const m=s.match(/^.*?[.!?](\s|$)/);return m?m[0].trim():s};
+ $("#rd-next").innerHTML=urgent.map(u=>`<li>${svgI("alert")}<div><b>${esc(u[0])}</b><span>${esc(first(u[1]))}</span></div></li>`).join("");
+ const recent=LEDGER.slice().sort((a,b)=>a.d<b.d?1:-1).slice(0,5);
+ $("#latest").innerHTML=recent.map(l=>`<li><span class="d">${dLabel(l)}</span><span>${esc(l.mod||l.item)}<span class="who">${l.type}${l.type==="Sale"?" · received by "+l.paid:" · "+(l.paid==="Split"?"split 50/50":"paid by "+l.paid)}</span></span><span class="num${l.amt<0?" in":""}">${l.amt<0?"+"+fmt(-l.amt):fmt(l.amt)}</span></li>`).join("");
+ $("#hist-sum").textContent=`${R.length} records · ${fmt0(total)} documented across ${spendRecs.length} priced invoices`;
+ const lastD=LEDGER.map(l=>l.d).sort().at(-1);
+ let fu=$("#foot-upd");if(!fu){fu=document.createElement("span");fu.id="foot-upd";$("#foot").append(fu)}fu.textContent=` Ledger last entry ${dLabel({d:lastD})}.`;
+}
+renderOverviewMoney();
+
+/* navigation: hash routing, back button, shortcuts */
+(function(){
+ const ids=SECTIONS.map(s=>s.id);
+ const counts={todo:[openCrit,"crit"],timeline:[R.length],ledger:[LEDGER.length],upgrades:[US.mods],sold:[US.sold],sources:[SOURCES.length]};
+ let g="",html="";
+ SECTIONS.forEach((s,i)=>{if(s.g!==g){g=s.g;html+=`<div class="grp" role="presentation">${g}</div>`}
+  const c=counts[s.id];
+  html+=`<a href="#${s.id}" data-go="${s.id}" title="${s.label} (${i+1})">${svgI(s.icon)}<span>${s.label}</span>${c?`<span data-count="${s.id}" class="n${c[1]?" "+c[1]:""}"${c[1]?` aria-label="${c[0]} urgent"`:""}>${c[0]}</span>`:""}</a>`});
+ $("#nav").innerHTML=html;
+ window.updateCounts=()=>{const v={ledger:LEDGER.length,upgrades:US.mods,sold:US.sold};Object.entries(v).forEach(([k,n])=>{const el=document.querySelector(`[data-count="${k}"]`);if(el)el.textContent=n})};
+ const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+ let current=null;
+ function go(id,{push=true,focus=false,scrollTo=null}={}){
+  if(!ids.includes(id))id="overview";
+  const s=SECTIONS.find(x=>x.id===id);
+  if(id!==current){
+   ids.forEach(k=>{document.getElementById(k).hidden=k!==id});
+   document.querySelectorAll("#nav a").forEach(a=>{a.dataset.go===id?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current")});
+   const ov=id==="overview";
+   $("#sechead").hidden=ov;
+   if(!ov){$("#crumb").textContent=s.g;$("#sectitle").textContent=s.label;$("#secdesc").textContent=s.desc}
+   document.title=ov?"E46 328Ci Logbook":s.label+" · E46 328Ci Logbook";
+   current=id;
+   try{localStorage.setItem("e46tab",id)}catch(e){}
+   const a=document.querySelector(`#nav a[data-go="${id}"]`);
+   const nv=$("#nav");if(a&&getComputedStyle(nv).flexDirection==="row"){const ar=a.getBoundingClientRect(),nr=nv.getBoundingClientRect();nv.scrollTo({left:nv.scrollLeft+ar.left-nr.left-(nr.width-ar.width)/2,behavior:reduce?"auto":"smooth"})}
+   if(!scrollTo)window.scrollTo(0,0);
+  }
+  if(push){try{if(location.hash!=="#"+id)location.hash=id}catch(e){}}
+  if(scrollTo){const el=document.getElementById(scrollTo);if(el)el.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})}
+  else if(focus){const h=id==="overview"?$("#ov-title"):$("#sectitle");h.focus({preventScroll:true})}
+ }
+ document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-go]");if(!a||e.metaKey||e.ctrlKey||e.shiftKey)return;
+  e.preventDefault();go(a.dataset.go,{focus:true,scrollTo:a.dataset.scroll||null});
+ });
+ window.addEventListener("hashchange",()=>go(location.hash.slice(1),{push:false}));
+ document.addEventListener("keydown",e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey||!$("#drawer").hidden)return;
+  const t=e.target;const typing=/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)||t.isContentEditable;
+  if(typing){if(e.key==="Escape")t.blur();return}
+  if(/^[1-9]$/.test(e.key)&&ids[+e.key-1]){e.preventDefault();go(ids[+e.key-1],{focus:true})}
+  else if(e.key==="/"){e.preventDefault();go("timeline");$("#q").focus()}
+ });
+ const hash=location.hash.slice(1);let saved=null;try{saved=localStorage.getItem("e46tab")}catch(e){}
+ const start=ids.includes(hash)?hash:(saved&&ids.includes(saved)?saved:"overview");
+ try{history.scrollRestoration="manual"}catch(e){}
+ go(start,{push:false});
+ window.addEventListener("load",()=>window.scrollTo(0,0));requestAnimationFrame(()=>window.scrollTo(0,0));
+ const top=$("#totop");
+ window.addEventListener("scroll",()=>top.classList.toggle("on",window.scrollY>900),{passive:true});
+ top.addEventListener("click",()=>{window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});(current==="overview"?$("#ov-title"):$("#sectitle")).focus({preventScroll:true})});
+})();
+
+
+/* ---------- live ledger: Supabase data, sign-in and editing ---------- */
+const SB_URL="https://qyetcwgjqxzewwjktnfr.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5ZXRjd2dqcXh6ZXd3amt0bmZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3MjE4NTUsImV4cCI6MjEwOTI5Nzg1NX0.V2lvHf0H5WV32uBNl0gx-g99NdF6bGVh6zOV7bvX3NI";
+const SNAP_DATE="3 Nov 2026";
+const live={ok:false,state:"loading",session:null,editor:false,syncedAt:null,err:null};
+let db=null;
+try{if(window.supabase)db=supabase.createClient(SB_URL,SB_KEY,{auth:{flowType:"pkce",detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}})}catch(e){db=null}
+
+function renderMoney(){renderLedger();renderUpgrades();renderOverviewMoney();if(window.updateCounts)updateCounts()}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("on"),2600)}
+
+async function loadLive(){
+ if(!db){live.state="snapshot";paintSync();return}
+ try{
+  const [l,p]=await Promise.all([
+   db.from("ledger_entries").select("*").order("entry_date").order("created_at"),
+   db.from("planned_purchases").select("*").order("created_at")]);
+  if(l.error||p.error)throw(l.error||p.error);
+  LEDGER=l.data.map(r=>({id:r.id,d:r.entry_date,item:r.item,mod:r.mod||undefined,type:r.type,paid:r.paid_by,amt:+r.amount,note:r.note||undefined,by:r.updated_by}));
+  PLANNED=p.data.map(r=>[r.item,r.notes||"",r.est_cost==null?null:+r.est_cost,r.id]);
+  live.ok=true;live.state="live";live.syncedAt=new Date();live.err=null;
+  renderMoney();
+ }catch(e){live.state="error";live.err=e}
+ paintSync();
+}
+async function refreshRole(){
+ live.editor=false;
+ if(db&&live.session){const r=await db.from("editors").select("email").limit(1);live.editor=!r.error&&r.data.length>0}
+ paintSync();
+}
+
+function paintSync(){
+ document.body.classList.toggle("can-edit",live.ok&&live.editor);
+ const s=$("#sync"),a=$("#edit-actions");
+ const t=live.syncedAt?live.syncedAt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"";
+ if(live.state==="loading"){s.className="sync";s.innerHTML=`<i></i>Loading the live ledger…`;a.innerHTML="";return}
+ if(live.state!=="live"){
+  s.className="sync error";
+  s.innerHTML=`<i></i>Can't reach the live ledger from here. Showing the snapshot from ${SNAP_DATE}.`;
+  a.innerHTML=db?`<button class="btn" type="button" data-act="retry">${svgI("refresh")}Try again</button>`:"";
+  return;
+ }
+ s.className="sync live";s.innerHTML=`<i></i>Live · updated ${t}`;
+ const email=live.session?.user?.email||"";
+ if(!live.session){a.innerHTML=`<button class="btn" type="button" data-act="signin">${svgI("login")}Sign in to edit</button>`}
+ else if(live.editor){a.innerHTML=`<button class="btn primary" type="button" data-act="add">${svgI("plus")}Add entry</button><button class="btn" type="button" data-act="add-planned">${svgI("plus")}Add planned purchase</button><span class="who-chip">${esc(email)}</span><button class="btn" type="button" data-act="signout">Sign out</button>`}
+ else{a.innerHTML=`<span class="who-chip">${esc(email)} can view but not edit this ledger.</span><button class="btn" type="button" data-act="signout">Sign out</button>`}
+}
+
+/* ---------- slide-over ---------- */
+let lastFocus=null;
+function openDrawer(title,html,init){
+ lastFocus=document.activeElement;
+ $("#dr-title").textContent=title;$("#dr-body").innerHTML=html;
+ $("#scrim").hidden=false;const d=$("#drawer");d.hidden=false;d.classList.remove("open");void d.offsetWidth;d.classList.add("open");
+ document.documentElement.style.overflow="hidden";
+ if(init)init();
+ const f=d.querySelector("input:not([type=radio]),textarea,select")||d.querySelector("input,button");if(f)f.focus();
+}
+function closeDrawer(){
+ $("#drawer").hidden=true;$("#scrim").hidden=true;document.documentElement.style.overflow="";
+ if(lastFocus&&document.contains(lastFocus))lastFocus.focus();
+}
+$("#dr-close").addEventListener("click",closeDrawer);
+$("#scrim").addEventListener("click",closeDrawer);
+document.addEventListener("keydown",e=>{
+ const d=$("#drawer");if(d.hidden)return;
+ if(e.key==="Escape"){e.preventDefault();closeDrawer();return}
+ if(e.key==="Tab"){const f=[...d.querySelectorAll('button,input,select,textarea,[href]')].filter(x=>!x.disabled&&x.offsetParent!==null);if(!f.length)return;
+  const first=f[0],last=f.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}
+});
+
+/* field helpers: validate on blur, clear on input */
+function fieldErr(input,msg){const box=input.closest(".ff");const p=box.querySelector(".ferr");input.setAttribute("aria-invalid",msg?"true":"false");if(msg){p.textContent=msg;p.hidden=false}else{p.hidden=true}}
+function bindValidation(form,rules){
+ Object.entries(rules).forEach(([id,fn])=>{const el=form.querySelector("#"+id);
+  el.addEventListener("blur",()=>fieldErr(el,fn(el.value)));
+  el.addEventListener("input",()=>{if(el.getAttribute("aria-invalid")==="true")fieldErr(el,fn(el.value))})});
+ return()=>{let firstBad=null;Object.entries(rules).forEach(([id,fn])=>{const el=form.querySelector("#"+id);const m=fn(el.value);fieldErr(el,m);if(m&&!firstBad)firstBad=el});if(firstBad)firstBad.focus();return!firstBad};
+}
+const friendly=e=>{const m=(e&&(e.message||e.error_description))||"Unknown error";
+ if(/row-level security|permission denied/i.test(m))return"This account can't edit the ledger. Sign in as Felipe or Bugsy.";
+ if(/JWT|expired/i.test(m))return"Your sign-in expired. Sign in again, then save.";
+ if(/fetch|network/i.test(m))return"No connection to the database. Check your internet and try again.";
+ return m};
+
+/* ---------- sign in ---------- */
+function openSignIn(){
+ openDrawer("Sign in to edit",`<form id="f-si" novalidate>
+  <p class="lede">Only Felipe and Bugsy can change the ledger. You'll get a one-time sign-in link by email.</p>
+  <div class="ff"><label for="si-email">Email</label><input id="si-email" type="email" autocomplete="email" inputmode="email" required><p class="ferr" hidden></p></div>
+  <div class="formerr" id="si-err" hidden></div>
+  <div class="dr-actions"><button class="btn primary" type="submit" id="si-go">Email me a sign-in link</button><button class="btn" type="button" data-act="close">Cancel</button></div></form>`,()=>{
+  const f=$("#f-si");const ok=bindValidation(f,{"si-email":v=>!v.trim()?"Enter your email.":(!/^\S+@\S+\.\S+$/.test(v.trim())?"Enter a full email address, like name@example.com.":"")});
+  f.addEventListener("submit",async e=>{e.preventDefault();if(!ok())return;
+   const email=$("#si-email").value.trim().toLowerCase(),b=$("#si-go");b.disabled=true;b.textContent="Sending…";$("#si-err").hidden=true;
+   try{localStorage.setItem("e46tab","ledger")}catch(_){}
+   const {error}=await db.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});
+   if(error){b.disabled=false;b.textContent="Email me a sign-in link";const m=/rate|429|seconds/i.test(error.message)?"Too many sign-in emails in a short time. Wait a minute, then try again.":friendly(error);$("#si-err").textContent=m;$("#si-err").hidden=false;return}
+   $("#dr-body").innerHTML=`<p>Check <b>${esc(email)}</b> for an email from Supabase and open the link <b>on this device</b>. The link works once and expires after an hour.</p><div class="dr-actions"><button class="btn" type="button" data-act="signin">Use a different email</button><button class="btn" type="button" data-act="close">Close</button></div>`;
+  });
+ });
+}
+
+/* ---------- ledger entry form ---------- */
+const TYPES=["Part","Service","Deposit","Purchase","Sale"];
+const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+function openEntry(entry,prefill){
+ const e=entry||{};const p=prefill||{};
+ const type=e.type||p.type||"Part",paid=e.paid||"Felipe";
+ const amt=e.amt!=null?Math.abs(e.amt):(p.amt!=null?p.amt:"");
+ const mods=[...new Set(LEDGER.map(l=>l.mod).filter(Boolean))];
+ openDrawer(entry?"Edit entry":"Add entry",`<form id="f-en" novalidate>
+  <fieldset class="ff"><legend>Type</legend><div class="choice">${TYPES.map(t=>`<label><input type="radio" name="en-type" value="${t}"${t===type?" checked":""}><span>${t}</span></label>`).join("")}</div></fieldset>
+  <div class="ff"><label for="en-date">Date</label><input id="en-date" type="date" value="${e.d||today()}" required><p class="ferr" hidden></p></div>
+  <div class="ff"><label for="en-item">Item</label><input id="en-item" type="text" value="${esc(e.item||p.item||"")}" placeholder="e.g. Hawk DTC-60 front pads" required><p class="ferr" hidden></p></div>
+  <div class="ff" id="en-mod-f"><label for="en-mod">Upgrade group <span class="opt">optional</span></label><input id="en-mod" type="text" list="en-mods" value="${esc(e.mod||"")}" autocomplete="off"><datalist id="en-mods">${mods.map(m=>`<option value="${esc(m)}">`).join("")}</datalist><p class="hint">Payments with the same group add up to one mod on the Upgrades page.</p><p class="ferr" hidden></p></div>
+  <fieldset class="ff"><legend id="en-paid-l">Paid by</legend><div class="choice">${["Felipe","Bugsy","Split"].map(w=>`<label><input type="radio" name="en-paid" value="${w}"${w===paid?" checked":""}><span>${w==="Split"?"Split 50/50":w}</span></label>`).join("")}</div></fieldset>
+  <div class="ff"><label for="en-amt" id="en-amt-l">Amount (USD)</label><input id="en-amt" type="number" inputmode="decimal" step="0.01" min="0.01" value="${amt}" required><p class="ferr" hidden></p></div>
+  <div class="effect" id="en-effect" aria-live="polite"></div>
+  <div class="ff"><label for="en-note">Note <span class="opt">optional</span></label><textarea id="en-note">${esc(e.note||"")}</textarea><p class="ferr" hidden></p></div>
+  <div class="formerr" id="en-err" hidden></div>
+  <div class="dr-actions"><button class="btn primary" type="submit" id="en-go">${entry?"Save changes":"Add entry"}</button><button class="btn" type="button" data-act="close">Cancel</button>${entry?`<button class="btn danger" type="button" id="en-del" style="margin-left:auto">Delete entry</button>`:""}</div>
+  <div id="en-confirm"></div></form>`,()=>{
+  const f=$("#f-en");
+  const ok=bindValidation(f,{"en-date":v=>v?"":"Pick the date it was paid or sold.","en-item":v=>v.trim()?"":"Describe what it was, so you both recognise it later.","en-amt":v=>(+v>0)?"":"Enter an amount above $0."});
+  const cur=()=>({type:f.querySelector("[name=en-type]:checked").value,paid:f.querySelector("[name=en-paid]:checked").value,amt:+$("#en-amt").value||0});
+  const sync=()=>{const c=cur(),sale=c.type==="Sale";
+   $("#en-mod-f").hidden=!(c.type==="Part"||c.type==="Deposit");
+   $("#en-paid-l").textContent=sale?"Received by":"Paid by";
+   $("#en-amt-l").textContent=sale?"Sold for (USD)":"Amount (USD)";
+   const h=c.amt/2;let m;
+   if(!c.amt)m="Enter an amount to see how it splits.";
+   else if(c.paid==="Split")m=`${fmt(h)} each, paid together. Doesn't change who owes whom.`;
+   else if(!sale)m=`${fmt(h)} each. ${c.paid==="Felipe"?"Bugsy":"Felipe"} owes ${c.paid} ${fmt(h)} more for this.`;
+   else m=`${fmt(h)} each. ${c.paid} owes ${c.paid==="Felipe"?"Bugsy":"Felipe"} ${fmt(h)} from this sale.`;
+   $("#en-effect").textContent=m};
+  f.addEventListener("change",sync);$("#en-amt").addEventListener("input",sync);sync();
+  f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;
+   const c=cur(),b=$("#en-go");b.disabled=true;b.textContent="Saving…";$("#en-err").hidden=true;
+   const row={entry_date:$("#en-date").value,item:$("#en-item").value.trim(),mod:(c.type==="Part"||c.type==="Deposit")&&$("#en-mod").value.trim()?$("#en-mod").value.trim():null,type:c.type,paid_by:c.paid,amount:c.type==="Sale"?-c2(c.amt):c2(c.amt),note:$("#en-note").value.trim()||null};
+   const r=entry?await db.from("ledger_entries").update(row).eq("id",entry.id).select():await db.from("ledger_entries").insert(row).select();
+   if(!r.error&&(!r.data||!r.data.length))r.error={message:"permission denied"};
+   if(r.error){b.disabled=false;b.textContent=entry?"Save changes":"Add entry";$("#en-err").textContent="Couldn't save. "+friendly(r.error)+" Your details are still in the form.";$("#en-err").hidden=false;return}
+   if(p.plannedId)await db.from("planned_purchases").delete().eq("id",p.plannedId);
+   closeDrawer();toast(entry?"Changes saved":(p.plannedId?"Moved to the ledger":"Entry added"));loadLive();
+  });
+  if(entry)$("#en-del").addEventListener("click",()=>confirmDelete("#en-confirm",`Delete “${entry.item}”? This removes it from the ledger for both of you.`,"Delete entry",async()=>{
+   const r=await db.from("ledger_entries").delete().eq("id",entry.id).select();
+   if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
+   closeDrawer();toast("Entry deleted");loadLive();
+  }));
+ });
+}
+function confirmDelete(sel,msg,label,run){
+ const box=$(sel);box.innerHTML=`<div class="confirm" role="alertdialog" aria-labelledby="cf-msg"><p id="cf-msg" style="margin:0 0 10px">${esc(msg)}</p><p class="ferr" id="cf-err" hidden></p><div class="dr-actions"><button class="btn danger" type="button" id="cf-yes">${label}</button><button class="btn" type="button" id="cf-no">Keep it</button></div></div>`;
+ $("#cf-no").addEventListener("click",()=>{box.innerHTML=""});
+ $("#cf-yes").addEventListener("click",async()=>{const b=$("#cf-yes");b.disabled=true;b.textContent="Deleting…";const err=await run();if(err){b.disabled=false;b.textContent=label;$("#cf-err").textContent="Couldn't delete. "+err;$("#cf-err").hidden=false}});
+ $("#cf-no").focus();
+}
+
+/* ---------- planned purchase form ---------- */
+function openPlanned(pl){
+ const has=!!pl;
+ openDrawer(has?"Edit planned purchase":"Add planned purchase",`<form id="f-pl" novalidate>
+  <div class="ff"><label for="pl-item">Item</label><input id="pl-item" type="text" value="${esc(has?pl[0]:"")}" required><p class="ferr" hidden></p></div>
+  <div class="ff"><label for="pl-notes">Notes <span class="opt">optional</span></label><input id="pl-notes" type="text" value="${esc(has?pl[1]:"")}"><p class="ferr" hidden></p></div>
+  <div class="ff"><label for="pl-cost">Estimated cost (USD) <span class="opt">optional</span></label><input id="pl-cost" type="number" inputmode="decimal" step="0.01" min="0" value="${has&&pl[2]!=null?pl[2]:""}"><p class="ferr" hidden></p></div>
+  <div class="formerr" id="pl-err" hidden></div>
+  <div class="dr-actions"><button class="btn primary" type="submit" id="pl-go">${has?"Save changes":"Add to plan"}</button><button class="btn" type="button" data-act="close">Cancel</button>${has?`<button class="btn" type="button" id="pl-bought">Mark as bought</button><button class="btn danger" type="button" id="pl-del">Delete</button>`:""}</div>
+  <div id="pl-confirm"></div></form>`,()=>{
+  const f=$("#f-pl");const ok=bindValidation(f,{"pl-item":v=>v.trim()?"":"Name the part or job.","pl-cost":v=>(v===""||+v>=0)?"":"Enter a cost of $0 or more, or leave it blank."});
+  f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;const b=$("#pl-go");b.disabled=true;b.textContent="Saving…";
+   const row={item:$("#pl-item").value.trim(),notes:$("#pl-notes").value.trim()||null,est_cost:$("#pl-cost").value===""?null:c2(+$("#pl-cost").value)};
+   const r=has?await db.from("planned_purchases").update(row).eq("id",pl[3]).select():await db.from("planned_purchases").insert(row).select();
+   if(!r.error&&!r.data.length)r.error={message:"permission denied"};
+   if(r.error){b.disabled=false;b.textContent=has?"Save changes":"Add to plan";$("#pl-err").textContent="Couldn't save. "+friendly(r.error);$("#pl-err").hidden=false;return}
+   closeDrawer();toast(has?"Changes saved":"Added to the plan");loadLive();
+  });
+  if(has){
+   $("#pl-bought").addEventListener("click",()=>openEntry(null,{type:"Part",item:pl[0],amt:pl[2],plannedId:pl[3]}));
+   $("#pl-del").addEventListener("click",()=>confirmDelete("#pl-confirm",`Delete “${pl[0]}” from planned purchases?`,"Delete",async()=>{
+    const r=await db.from("planned_purchases").delete().eq("id",pl[3]).select();
+    if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
+    closeDrawer();toast("Removed from the plan");loadLive();}));
+  }
+ });
+}
+
+/* ---------- wiring ---------- */
+document.addEventListener("click",async e=>{
+ const a=e.target.closest("[data-act],[data-edit],[data-edit-planned]");if(!a)return;
+ if(a.dataset.edit){const en=LEDGER.find(l=>l.id===a.dataset.edit);if(en)openEntry(en);return}
+ if(a.dataset.editPlanned){const pl=PLANNED.find(p=>p[3]===a.dataset.editPlanned);if(pl)openPlanned(pl);return}
+ const act=a.dataset.act;
+ if(act==="close")closeDrawer();
+ else if(act==="signin")openSignIn();
+ else if(act==="add")openEntry(null,a.dataset.type?{type:a.dataset.type}:null);
+ else if(act==="add-planned")openPlanned(null);
+ else if(act==="retry"){live.state="loading";paintSync();loadLive()}
+ else if(act==="signout"){await db.auth.signOut();toast("Signed out")}
+});
+if(db){
+ db.auth.onAuthStateChange((ev,session)=>{
+  live.session=session;
+  if(/[?&]code=/.test(location.search)){try{history.replaceState(null,"",location.pathname+location.hash)}catch(_){}}
+  setTimeout(refreshRole,0);
+ });
+ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&live.ok&&(Date.now()-live.syncedAt)>60000)loadLive()});
+}
+paintSync();loadLive();
+
+</script>
+
+</body>
+</html>
