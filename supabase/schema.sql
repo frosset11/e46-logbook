@@ -92,3 +92,15 @@ create table public.notes (
 alter table public.issues add column owner text, add column category text check (category in ('Mechanical','Body & interior'));
 alter table public.service_items add column owner text;
 -- Signups are limited to rows in public.editors by a before-insert trigger on auth.users (private.only_editors_can_sign_up).
+
+-- 3 Nov 2026: build sheet. Listing equipment plus parts from the ledger; replaces/sold_entry link old parts and sales.
+-- status: fitted | pending (bought, not fitted) | removed | sold | spare. Same access rules as the ledger.
+create table public.build_items (
+  id uuid primary key default gen_random_uuid(),
+  section text not null check (section in ('Engine','Drivetrain','Suspension & chassis','Brakes & wheels','Interior','Exterior','Spares')),
+  item text not null, status text not null default 'fitted' check (status in ('fitted','pending','removed','sold','spare')),
+  source text not null default 'manual' check (source in ('listing','ledger','manual')), evidence text check (evidence in ('yes','part','no')),
+  mod text, replaces uuid references public.build_items(id) on delete set null, sold_entry uuid references public.ledger_entries(id) on delete set null,
+  fitted_on date, removed_on date, notes text, sort int not null default 0,
+  created_at timestamptz not null default now(), updated_at timestamptz not null default now(), updated_by text default (auth.jwt() ->> 'email')
+);

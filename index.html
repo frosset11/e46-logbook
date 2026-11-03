@@ -431,6 +431,27 @@ body.can-edit .ro-only{display:none!important}
 .hot circle.ring{filter:drop-shadow(0 2px 3px rgb(0 0 0 / .35))}
 .map-layout{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
 @media (max-width:960px){.map-layout{grid-template-columns:1fr}}
+/* ---------- build sheet ---------- */
+.build-sum{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:860px){.build-sum{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.build-sum{grid-template-columns:1fr}}
+.tile .v.warn{color:var(--warn)}
+#build .cardhead{margin-bottom:12px}
+.build ul,.blist{list-style:none;margin:0;padding:0}
+.build li,.blist li{display:flex;align-items:center;gap:8px;border-bottom:1px dashed var(--line);padding:0}
+.build li:last-child,.blist li:last-child{border-bottom:0}
+.brow{flex:1;min-width:0;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;background:none;border:0;padding:7px 6px;margin:0 -6px;border-radius:6px;font:inherit;font-size:14px;color:inherit;cursor:pointer;min-height:40px}
+.brow:hover{background:var(--surface-2)}
+.brow:focus-visible{outline:2px solid var(--fern);outline-offset:0}
+.brow .bn{min-width:0}
+.brow small{display:block;color:var(--muted);font-size:12px}
+.brow .ev,.brow .pill{flex:none}
+.btn.mini{min-height:36px;padding:0 10px;font-size:13px}
+.pend-card{border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.buildbox{background:var(--surface-2);border-radius:8px;padding:12px!important;margin-bottom:16px}
+.buildbox select,.ff select{font:inherit;font-size:16px;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);width:100%}
+.buildbox .ff:last-child{margin-bottom:0}
+.case-dl .linkbtn{min-height:0;text-align:left;font-weight:600}
 </style>
 
 <div class="app">
@@ -546,12 +567,11 @@ body.can-edit .ro-only{display:none!important}
 
   <!-- BUILD -->
   <section class="panel" id="build" aria-labelledby="sectitle" hidden>
-    <p class="lede" style="color:var(--muted);margin:0 0 14px"><span class="ev yes">Invoice</span> means a receipt backs it up; <span class="ev">Seller only</span> means it is only in the Cars &amp; Bids listing.</p>
+    <div class="ledger-sum build-sum" id="build-sum"></div>
+    <div class="cardhead"><div class="seg" id="build-seg" role="group" aria-label="Filter the build sheet"></div><button class="btn ed-only" type="button" data-act="add-build"><svg-i name="plus"></svg-i>Add part</button></div>
+    <div class="card pend-card" id="build-pending" hidden style="margin-bottom:12px"><h2>Bought, not fitted yet</h2><p class="lede">Mark each one fitted once it's on the car. Anything it replaces moves to Removed.</p><ul class="blist" id="build-pending-list"></ul></div>
     <div class="build" id="buildsheet"></div>
-    <div class="card" style="margin-top:16px">
-      <h2>Spares and extras included in the sale</h2>
-      <ul id="extras" style="margin:6px 0 0;padding-left:18px"></ul>
-    </div>
+    <p class="lede" style="color:var(--muted);margin:14px 0 0"><span class="ev yes">Invoice</span> means a receipt backs up a part from the listing; <span class="ev">Seller only</span> means it's only in the Cars &amp; Bids listing. <span class="ev yes">Added</span> parts come from your ledger, with what you paid. Tap any part to open it.</p>
   </section>
 
   <!-- TODO -->
@@ -700,7 +720,7 @@ document.querySelectorAll("svg-i").forEach(el=>{el.outerHTML=svgI(el.getAttribut
 const SECTIONS=[
  {id:"overview",g:"Car",label:"Overview",icon:"dash",desc:""},
  {id:"carmap",g:"Car",label:"Car map",icon:"car",desc:"Every record placed on the part of the car it touched."},
- {id:"build",g:"Car",label:"Build sheet",icon:"list",desc:"Equipment the seller listed on Cars & Bids, checked against the invoices."},
+ {id:"build",g:"Car",label:"Build sheet",icon:"list",desc:"What's on the car right now: the listing, plus everything you've bought, fitted, removed or sold. Logging a part or a sale in the ledger updates it."},
  {id:"todo",g:"Work",label:"Issues & service",icon:"wrench",desc:"Known problems and the baseline service to do before the first track day. Tap an item to open it, or tick it off when it's done."},
  {id:"notes",g:"Work",label:"Notes",icon:"note",desc:"Reminders and notes for the car. Tick them off when they're done."},
  {id:"ledger",g:"Money",label:"Ledger",icon:"wallet",desc:"Shared costs and income since the purchase on 1 Oct 2026, split 50/50."},
@@ -1003,10 +1023,6 @@ $("#findings").innerHTML=[
  ["#q","#f-owner","#f-cat","#f-order"].forEach(s=>$(s).addEventListener("input",render));render();
 })();
 
-/* build sheet */
-const EVL={yes:["Invoice","ev yes"],part:["Partly on invoice","ev"],no:["Seller only","ev"]};
-$("#buildsheet").innerHTML=BUILD.map(g=>`<div class="card"><h3>${g.h}</h3><ul>${g.items.map(i=>`<li><span>${esc(i[0])}</span><span class="${EVL[i[1]][1]}">${EVL[i[1]][0]}</span></li>`).join("")}</ul></div>`).join("");
-$("#extras").innerHTML=EXTRAS.map(e=>`<li>${esc(e)}</li>`).join("");
 
 /* issues + service + notes (live, tickable) */
 const PL={crit:["Urgent","p-crit"],warn:["Soon","p-warn"],info:["Low","p-info"],ok:["OK","p-ok"]};
@@ -1026,7 +1042,7 @@ const FILT={iss:"open",cat:"all",due:"all",notes:"open"};
 function segment(el,key,opts){
  el.innerHTML=opts.map(o=>`<button type="button" aria-pressed="${o.v===FILT[key]}" data-seg="${key}" data-v="${o.v}">${o.l}<b>${o.n}</b></button>`).join("");
 }
-document.addEventListener("click",e=>{const b=e.target.closest("[data-seg]");if(!b)return;FILT[b.dataset.seg]=b.dataset.v;b.dataset.seg==="notes"?renderNotes():renderWork()});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-seg]");if(!b)return;FILT[b.dataset.seg]=b.dataset.v;b.dataset.seg==="notes"?renderNotes():b.dataset.seg==="build"?renderBuild():renderWork()});
 
 function renderWork(){
  const iss=ISS.slice().sort((a,b)=>(a.resolved-b.resolved)||(RANK[a.p]-RANK[b.p])||(a.sort-b.sort));
@@ -1068,6 +1084,193 @@ function renderNotes(){
  if(window.updateCounts)updateCounts();
 }
 
+/* ---------- build sheet (live, linked to the ledger) ---------- */
+const EVL={yes:["Invoice","ev yes"],part:["Partly on invoice","ev"],no:["Seller only","ev"]};
+const SECS=["Engine","Drivetrain","Suspension & chassis","Brakes & wheels","Interior","Exterior"];
+const BST={fitted:["On the car","p-ok"],pending:["Bought, not fitted","p-warn"],removed:["Removed","p-info"],sold:["Sold","p-info"],spare:["In spares","p-info"]};
+const SECMAP={"Brakes, wheels":"Brakes & wheels"};
+let BI=[];BUILD.forEach(g=>g.items.forEach(i=>BI.push({key:"lb"+BI.length,section:SECMAP[g.h]||g.h,item:i[0],status:"fitted",source:"listing",evidence:i[1],sort:BI.length})));
+EXTRAS.forEach(e=>BI.push({key:"lb"+BI.length,section:"Spares",item:e,status:"spare",source:"listing",sort:BI.length}));
+FILT.build="car";
+const bid=x=>x.id||x.key;
+const modCost=m=>m?LEDGER.filter(l=>(l.type==="Part"||l.type==="Deposit")&&(l.mod||l.item)===m).reduce((a,l)=>a+l.amt,0):0;
+const modFirst=m=>{const d=LEDGER.filter(l=>(l.mod||l.item)===m).map(l=>l.d).sort()[0];return d};
+const replacedBy=x=>BI.find(z=>z.replaces&&z.replaces===x.id);
+
+/* smart matching: word overlap between names, ignoring filler words */
+const STOP=new Set("the and with for from came car set pair sold old new previous used oem kit a an of to on in front rear left right side x2 one two".split(" "));
+const toks=s=>new Set(String(s||"").toLowerCase().replace(/[^a-z0-9 ]+/g," ").split(/\s+/).filter(w=>w.length>=3&&!STOP.has(w)));
+function bestMatch(text,cands){const t=toks(text);let best=null,bs=0;cands.forEach(c=>{const ct=toks(c.item+" "+(c.mod||""));let sc=0;t.forEach(w=>{if(ct.has(w))sc+=w.length>4?2:1});if(c.status==="removed"||c.status==="spare")sc+=.5;if(sc>bs){bs=sc;best=c}});return bs>=2?best:null}
+const SECKEYS=[["Interior",/steering wheel|seat|harness|shift|knob|gauge|cage|pedal|switch|dash|door card|extinguisher|belt|airbag|stereo|radio|speaker/],
+ ["Brakes & wheels",/brake|pad|rotor|caliper|wheel|tire|tyre|lug|spacer|hub/],
+ ["Suspension & chassis",/coilover|spring|shock|strut|sway|camber|control arm|subframe|suspension|monoball|bushing(?!.*clutch)|mount(?!.*(engine|trans))/],
+ ["Drivetrain",/clutch|flywheel|diff|lsd|gearbox|transmission|axle|driveshaft|guibo|trans mount/],
+ ["Engine",/engine|intake|exhaust|header|tune|oil|pulley|coil|plug|injector|radiator|thermostat|cooling|throttle|dme|ecu|fuel/],
+ ["Exterior",/wing|lip|skirt|wrap|lamp|light|badge|roundel|grille|hood|bumper|mirror|decal|splitter|diffuser|paint/]];
+const guessSection=s=>{s=String(s||"").toLowerCase();const m=SECKEYS.find(([,re])=>re.test(s));return m?m[0]:"Interior"};
+
+function brow(x){
+ const cost=x.source!=="listing"?modCost(x.mod):0,rb=replacedBy(x),sale=x.sold_entry&&LEDGER.find(l=>l.id===x.sold_entry);
+ let tag;
+ if(x.status==="fitted")tag=x.source==="listing"?`<span class="${EVL[x.evidence]?EVL[x.evidence][1]:"ev"}">${EVL[x.evidence]?EVL[x.evidence][0]:"Listing"}</span>`:`<span class="ev yes">Added${cost?" · "+fmt0(cost):""}</span>`;
+ else if(x.status==="sold")tag=`<span class="ev">Sold${sale?" · "+fmt(-sale.amt):""}</span>`;
+ else tag=`<span class="pill ${BST[x.status][1]}">${BST[x.status][0]}</span>`;
+ const sub=x.status==="removed"||x.status==="sold"?(rb?`Replaced by ${esc(rb.item)}`:(x.removed_on?"Off the car "+dShort(x.removed_on):"")):(x.status==="pending"&&cost?`Paid ${fmt(cost)}`:"");
+ return `<li><button type="button" class="brow" data-open-build="${bid(x)}"><span class="bn">${esc(x.item)}${sub?`<small>${sub}</small>`:""}</span>${tag}</button>${x.status==="pending"?`<button class="btn mini ed-only" type="button" data-fit="${bid(x)}">${svgI("check")}Mark fitted</button>`:""}</li>`;
+}
+function renderBuild(){
+ const on=BI.filter(x=>x.status==="fitted"&&x.section!=="Spares"),pend=BI.filter(x=>x.status==="pending"),gone=BI.filter(x=>x.status==="removed"||x.status==="sold"),spare=BI.filter(x=>x.status==="spare");
+ const ours=BI.filter(x=>x.source!=="listing"&&(x.status==="fitted"||x.status==="pending"));
+ const oursCost=ours.reduce((a,x)=>a+modCost(x.mod),0);
+ $("#build-sum").innerHTML=`<div class="tile"><div class="k">On the car</div><div class="v">${on.length}</div><div class="s">parts and mods fitted now</div></div>
+  <div class="tile"><div class="k">Added by you two</div><div class="v">${ours.length}</div><div class="s">${fmt0(oursCost)} from the ledger</div></div>
+  <div class="tile"><div class="k">Waiting to be fitted</div><div class="v${pend.length?" warn":""}">${pend.length}</div><div class="s">bought, not on the car yet</div></div>
+  <div class="tile"><div class="k">Removed or sold</div><div class="v">${gone.length}</div><div class="s">${gone.filter(x=>x.status==="sold").length} sold</div></div>`;
+ segment($("#build-seg"),"build",[{v:"car",l:"On the car",n:on.length},{v:"pending",l:"Waiting to fit",n:pend.length},{v:"gone",l:"Removed & sold",n:gone.length},{v:"spare",l:"Spares",n:spare.length},{v:"all",l:"All",n:BI.length}]);
+ const f=FILT.build,show=x=>f==="all"||(f==="car"&&x.status==="fitted")||(f==="pending"&&x.status==="pending")||(f==="gone"&&(x.status==="removed"||x.status==="sold"))||(f==="spare"&&x.status==="spare");
+ $("#build-pending").hidden=!(pend.length&&(f==="car"||f==="all"));
+ $("#build-pending-list").innerHTML=pend.map(brow).join("");
+ const secs=[...SECS,"Spares"].map(s=>({s,items:BI.filter(x=>x.section===s&&show(x)&&!(x.status==="pending"&&(f==="car"||f==="all"))).sort((a,b)=>(a.sort||0)-(b.sort||0))})).filter(g=>g.items.length);
+ $("#buildsheet").innerHTML=secs.map(g=>`<div class="card"><h3>${g.s}</h3><ul>${g.items.map(brow).join("")}</ul></div>`).join("")||`<div class="empty" style="grid-column:1/-1">Nothing in this view.</div>`;
+ if(window.updateCounts)updateCounts();
+}
+renderBuild();
+
+async function setBuild(x,row,msg){
+ const r=await db.from("build_items").update(row).eq("id",x.id).select();
+ if(r.error||!r.data.length){toast("Couldn't save. "+friendly(r.error||{message:"permission denied"}));return false}
+ if(row.status==="fitted"&&x.replaces){const old=BI.find(z=>z.id===x.replaces);
+  if(old&&old.status==="fitted"){await db.from("build_items").update({status:"removed",removed_on:today(),notes:[old.notes,`Replaced by ${x.item}.`].filter(Boolean).join(" ")}).eq("id",old.id);msg=(msg||"Saved")+`. ${old.item} moved to Removed`}}
+ if(msg)toast(msg);await loadWork().catch(()=>{});return true;
+}
+document.addEventListener("click",async e=>{
+ const fb=e.target.closest("[data-fit]");if(fb){const x=BI.find(z=>bid(z)===fb.dataset.fit);if(x&&x.id){fb.disabled=true;await setBuild(x,{status:"fitted",fitted_on:today()},"Marked fitted")}return}
+ const ob=e.target.closest("[data-open-build]");if(ob){openBuildCase(ob.dataset.openBuild);return}
+ const a=e.target.closest("[data-act=add-build]");if(a)openBuild(null);
+});
+
+function buildCaseHTML(x){
+ const cost=modCost(x.mod),rb=replacedBy(x),rep=x.replaces&&BI.find(z=>z.id===x.replaces),sale=x.sold_entry&&LEDGER.find(l=>l.id===x.sold_entry);
+ const src=x.source==="listing"?`Cars &amp; Bids listing${EVL[x.evidence]?" · "+EVL[x.evidence][0].toLowerCase():""}`:x.source==="ledger"?"Bought by you (ledger)":"Added by hand";
+ return `<div class="case">
+  <div class="case-head"><span class="pill ${BST[x.status][1]}">${BST[x.status][0]}</span><h3>${esc(x.item)}</h3></div>
+  ${statusPicker("bs",Object.entries(BST).map(([v,[l]])=>[v,l]),x.status,"Status")}
+  <div class="ro-only signin-hint case-ro"><p>Sign in as Felipe or Bugsy to change this part.</p><button class="btn primary" type="button" data-act="signin">${svgI("login")}Sign in to edit</button></div>
+  <div id="bs-sold" class="ed-only" hidden><p class="lede" style="margin:0 0 10px">Log the sale in the ledger so the money is split, or just mark it sold.</p>
+   <div class="dr-actions" style="margin-bottom:16px"><button class="btn primary" type="button" id="bs-logsale">Log the sale</button><button class="btn" type="button" id="bs-justsold">Just mark sold</button></div></div>
+  <dl class="case-dl">
+   <div><dt>Section</dt><dd>${esc(x.section)}</dd></div>
+   <div><dt>Source</dt><dd>${src}</dd></div>
+   ${cost?`<div><dt>Cost</dt><dd>${fmt(cost)} <span class="muted">(${fmt(cost/2)} each)</span>${modFirst(x.mod)?` · first paid ${dShort(modFirst(x.mod))}`:""}</dd></div>`:""}
+   ${rep?`<div><dt>Replaces</dt><dd><button class="linkbtn" type="button" data-open-build="${bid(rep)}">${esc(rep.item)}</button></dd></div>`:""}
+   ${rb?`<div><dt>Replaced by</dt><dd><button class="linkbtn" type="button" data-open-build="${bid(rb)}">${esc(rb.item)}</button></dd></div>`:""}
+   ${x.fitted_on&&x.status==="fitted"?`<div><dt>Fitted</dt><dd>${dShort(x.fitted_on)}</dd></div>`:""}
+   ${x.removed_on&&(x.status==="removed"||x.status==="sold")?`<div><dt>${x.status==="sold"?"Sold":"Removed"}</dt><dd>${dShort(x.removed_on)}${sale?` · ${fmt(-sale.amt)}, received by ${esc(sale.paid)}`:""}</dd></div>`:""}
+   <div><dt>Notes</dt><dd>${x.notes?`<p class="pre">${esc(x.notes)}</p>`:`<span class="muted">No notes yet.</span>`}</dd></div>
+  </dl>
+  <p class="case-meta">${changed({upd_at:x.updated_at,upd_by:x.updated_by})}</p>
+  <div class="formerr" id="cs-err" hidden></div><div id="cs-confirm"></div>
+  <div class="dr-actions ed-only"><button class="btn" type="button" id="bs-edit">${svgI("pencil")}Edit details</button><button class="btn danger" type="button" id="bs-del" style="margin-left:auto">Delete part</button></div></div>`;
+}
+function openBuildCase(id,fresh){
+ const x=BI.find(z=>bid(z)===id);if(!x)return;
+ if(fresh&&!$("#drawer").hidden){$("#dr-title").textContent="Build sheet";$("#dr-body").innerHTML=buildCaseHTML(x)}else openDrawer("Build sheet",buildCaseHTML(x));
+ const body=$("#dr-body");
+ body.querySelectorAll("[name=bs]").forEach(r=>r.addEventListener("change",async()=>{
+  const v=r.value;
+  if(v==="sold"&&!x.sold_entry){$("#bs-sold").hidden=false;return}
+  $("#bs-sold").hidden=true;
+  const row={status:v};if(v==="fitted")row.fitted_on=x.fitted_on||today();if(v==="removed"||v==="sold")row.removed_on=today();
+  if(await setBuild(x,row,"Moved to "+BST[v][0].toLowerCase()))openBuildCase(id,true);
+ }));
+ $("#bs-logsale").addEventListener("click",()=>openEntry(null,{type:"Sale",item:x.item+" (sold)",buildSold:x.id}));
+ $("#bs-justsold").addEventListener("click",async()=>{if(await setBuild(x,{status:"sold",removed_on:today()},"Marked sold"))openBuildCase(id,true)});
+ $("#bs-edit").addEventListener("click",()=>openBuild(x));
+ $("#bs-del").addEventListener("click",()=>confirmDelete("#cs-confirm",`Delete “${x.item}” from the build sheet? Marking it removed or sold keeps the history.`,"Delete part",async()=>{
+  const r=await db.from("build_items").delete().eq("id",x.id).select();if(r.error||!r.data.length)return friendly(r.error||{message:"permission denied"});
+  closeDrawer();toast("Part deleted");loadWork().catch(()=>{})}));
+}
+function repOptions(sec,selfId,cur){
+ const c=BI.filter(z=>z.id&&z.id!==selfId&&(z.status==="fitted"||z.status==="removed")&&z.section!=="Spares");
+ return `<option value="">Nothing, it's new</option>`+SECS.map(s=>{const g=c.filter(z=>z.section===s);return g.length?`<optgroup label="${s}">${g.map(z=>`<option value="${z.id}"${z.id===cur?" selected":""}>${esc(z.item)}</option>`).join("")}</optgroup>`:""}).join("");
+}
+function openBuild(x){
+ const has=!!x;x=x||{section:"Interior",status:"fitted"};
+ const mods=[...new Set(LEDGER.filter(l=>l.type==="Part"||l.type==="Deposit").map(l=>l.mod||l.item))];
+ openDrawer(has?"Edit part":"Add part",`<form id="f-bi" novalidate>
+  <div class="ff"><label for="bi-t">Part</label><input id="bi-t" type="text" value="${esc(x.item||"")}" placeholder="e.g. Hawk DTC-60 front pads" required><p class="ferr" hidden></p></div>
+  <div class="ff"><label for="bi-sec">Section</label><select id="bi-sec">${[...SECS,"Spares"].map(s=>`<option${s===x.section?" selected":""}>${s}</option>`).join("")}</select></div>
+  ${statusPicker("bi-s",Object.entries(BST).map(([v,[l]])=>[v,l]),x.status,"Status").replace(' ed-only','')}
+  <div class="ff"><label for="bi-rep">Replaces <span class="opt">optional</span></label><select id="bi-rep">${repOptions(x.section,x.id,x.replaces)}</select><p class="hint">When this part is on the car, the one it replaces moves to Removed.</p></div>
+  <div class="ff"><label for="bi-mod">Ledger upgrade group <span class="opt">optional</span></label><input id="bi-mod" type="text" list="bi-mods" autocomplete="off" value="${esc(x.mod||"")}"><datalist id="bi-mods">${mods.map(m=>`<option value="${esc(m)}">`).join("")}</datalist><p class="hint">Links the part to its payments so the cost shows here.</p></div>
+  <div class="ff"><label for="bi-n">Notes <span class="opt">optional</span></label><textarea id="bi-n">${esc(x.notes||"")}</textarea></div>
+  <div class="formerr" id="bi-err" hidden></div>
+  <div class="dr-actions"><button class="btn primary" type="submit" id="bi-go">${has?"Save changes":"Add part"}</button><button class="btn" type="button" data-act="close">Cancel</button></div></form>`,()=>{
+  const f=$("#f-bi");const ok=bindValidation(f,{"bi-t":v=>v.trim()?"":"Name the part."});
+  if(!has)$("#bi-t").addEventListener("change",()=>{const v=$("#bi-t").value;if(!$("#bi-sec").dataset.touched)$("#bi-sec").value=guessSection(v);if(!$("#bi-rep").dataset.touched){const m=bestMatch(v,BI.filter(z=>z.id&&z.status==="fitted"&&z.section===$("#bi-sec").value));$("#bi-rep").value=m?m.id:""}});
+  ["bi-sec","bi-rep"].forEach(i=>$("#"+i).addEventListener("change",e=>{e.target.dataset.touched="1"}));
+  f.addEventListener("submit",async ev=>{ev.preventDefault();if(!ok())return;const b=$("#bi-go");b.disabled=true;b.textContent="Saving…";
+   const st=f.querySelector("[name=bi-s]:checked").value;
+   const row={item:$("#bi-t").value.trim(),section:$("#bi-sec").value,status:st,replaces:$("#bi-rep").value||null,mod:$("#bi-mod").value.trim()||null,notes:$("#bi-n").value.trim()||null};
+   if(st==="fitted"&&!(has&&x.fitted_on))row.fitted_on=today();
+   if((st==="removed"||st==="sold")&&!(has&&x.removed_on))row.removed_on=today();
+   if(!has){row.source="manual";row.sort=Math.max(0,...BI.map(z=>z.sort||0))+1}
+   const r=has?await db.from("build_items").update(row).eq("id",x.id).select():await db.from("build_items").insert(row).select();
+   if(!r.error&&!r.data.length)r.error={message:"permission denied"};
+   if(r.error){b.disabled=false;b.textContent=has?"Save changes":"Add part";$("#bi-err").textContent="Couldn't save. "+friendly(r.error);$("#bi-err").hidden=false;return}
+   const saved=r.data[0];
+   if(st==="fitted"&&row.replaces){const old=BI.find(z=>z.id===row.replaces);if(old&&old.status==="fitted")await db.from("build_items").update({status:"removed",removed_on:today(),notes:[old.notes,`Replaced by ${row.item}.`].filter(Boolean).join(" ")}).eq("id",old.id)}
+   toast(has?"Changes saved":"Part added");await loadWork().catch(()=>{});
+   if(has)openBuildCase(x.id,true);else closeDrawer();
+  });
+ });
+}
+
+/* build sheet section inside the ledger entry form */
+function buildBoxHTML(type,prefill){
+ if(type==="Sale"){
+  const c=BI.filter(z=>z.id&&(z.status==="fitted"||z.status==="removed"||z.status==="spare"));
+  return `<div class="ff buildbox"><label for="bb-sold">Part sold <span class="opt">optional</span></label><select id="bb-sold"><option value="">Not on the build sheet</option>${[...SECS,"Spares"].map(s=>{const g=c.filter(z=>z.section===s);return g.length?`<optgroup label="${s}">${g.map(z=>`<option value="${z.id}"${prefill&&prefill.buildSold===z.id?" selected":""}>${esc(z.item)}</option>`).join("")}</optgroup>`:""}).join("")}</select><p class="hint" id="bb-hint">It moves to Removed &amp; sold on the build sheet.</p></div>`;
+ }
+ if(type==="Part"||type==="Deposit"){
+  return `<fieldset class="ff buildbox"><legend>Build sheet</legend>
+   <p class="hint" id="bb-linked" hidden></p>
+   <label class="checkrow" id="bb-add-l"><input type="checkbox" id="bb-add" checked> Add to the build sheet</label>
+   <div id="bb-fields">
+    <div class="ff"><label for="bb-sec">Section</label><select id="bb-sec">${SECS.map(s=>`<option>${s}</option>`).join("")}</select></div>
+    <fieldset class="ff"><legend>On the car yet?</legend><div class="choice"><label><input type="radio" name="bb-st" value="fitted"${type==="Part"?" checked":""}><span>Fitted</span></label><label><input type="radio" name="bb-st" value="pending"${type==="Deposit"?" checked":""}><span>Not yet</span></label></div></fieldset>
+    <div class="ff"><label for="bb-rep">Replaces <span class="opt">optional</span></label><select id="bb-rep">${repOptions(null,null,null)}</select><p class="hint" id="bb-hint">The part it replaces moves to Removed once this one is fitted.</p></div>
+   </div></fieldset>`;
+ }
+ return "";
+}
+function wireBuildBox(f,prefill){
+ const itemEl=$("#en-item"),modEl=$("#en-mod");
+ const linkCheck=()=>{const add=$("#bb-add");if(!add)return;const m=(modEl.value.trim()||itemEl.value.trim());const ex=m&&BI.find(z=>z.mod&&z.mod===m);
+  $("#bb-linked").hidden=!ex;$("#bb-add-l").hidden=!!ex;$("#bb-fields").hidden=!!ex||!add.checked;if(ex)$("#bb-linked").textContent=`Already on the build sheet as “${ex.item}”. This payment adds to its cost.`};
+ const suggest=()=>{const v=itemEl.value;
+  const sold=$("#bb-sold");if(sold&&!sold.dataset.touched&&!(prefill&&prefill.buildSold)){const m=bestMatch(v,BI.filter(z=>z.id&&(z.status==="fitted"||z.status==="removed"||z.status==="spare")));sold.value=m?m.id:"";$("#bb-hint").textContent=m?`Suggested from the name: ${m.item}. Change it if that's wrong.`:"It moves to Removed & sold on the build sheet."}
+  const sec=$("#bb-sec"),rep=$("#bb-rep");
+  if(sec&&!sec.dataset.touched)sec.value=guessSection(v);
+  if(rep&&!rep.dataset.touched){const m=bestMatch(v,BI.filter(z=>z.id&&z.status==="fitted"&&z.section===sec.value));rep.value=m?m.id:"";$("#bb-hint").textContent=m?`Suggested: replaces ${m.item}. Change it if that's wrong.`:"The part it replaces moves to Removed once this one is fitted."}
+  linkCheck()};
+ f.querySelectorAll("#bb-sold,#bb-sec,#bb-rep").forEach(el=>el.addEventListener("change",()=>{el.dataset.touched="1"}));
+ const add=$("#bb-add");if(add)add.addEventListener("change",linkCheck);
+ itemEl.addEventListener("input",()=>{clearTimeout(wireBuildBox.t);wireBuildBox.t=setTimeout(suggest,350)});
+ modEl.addEventListener("input",linkCheck);
+ suggest();
+}
+async function applyBuildFromEntry(entryRow,saved,prefill){
+ try{
+  if(entryRow.type==="Sale"){const id=$("#bb-sold")&&$("#bb-sold").value;if(id){await db.from("build_items").update({status:"sold",sold_entry:saved.id,removed_on:entryRow.entry_date}).eq("id",id);return "Marked sold on the build sheet"}return ""}
+  const add=$("#bb-add");if(!add||!add.checked||!$("#bb-linked").hidden)return "";
+  const st=document.querySelector("[name=bb-st]:checked").value,rep=$("#bb-rep").value||null,mod=entryRow.mod||entryRow.item;
+  await db.from("build_items").insert({section:$("#bb-sec").value,item:entryRow.item,status:st,source:"ledger",mod,replaces:rep,fitted_on:st==="fitted"?entryRow.entry_date:null,sort:Math.max(0,...BI.map(z=>z.sort||0))+1});
+  if(st==="fitted"&&rep){const old=BI.find(z=>z.id===rep);if(old&&old.status==="fitted")await db.from("build_items").update({status:"removed",removed_on:entryRow.entry_date,notes:[old.notes,`Replaced by ${entryRow.item}.`].filter(Boolean).join(" ")}).eq("id",rep)}
+  return st==="fitted"?"Added to the build sheet":"Added to the build sheet as waiting to be fitted";
+ }catch(e){return "Saved, but the build sheet didn't update. Open the part on the Build sheet to fix it."}
+}
+
 /* ledger */
 function renderLedger(){
  let F=0,Bg=0,tot=0,fPaid=0,bPaid=0;
@@ -1097,7 +1300,7 @@ function renderUpgrades(){
   g.amt+=l.amt;if(l.paid==="Felipe")g.F+=l.amt;else if(l.paid==="Bugsy")g.B+=l.amt;else{g.F+=l.amt/2;g.B+=l.amt/2}});
  const ut=G.reduce((a,g)=>a+g.amt,0),uf=G.reduce((a,g)=>a+g.F,0);
  const who=g=>g.F&&g.B?(Math.abs(g.F-g.B)<0.005?"Split 50/50":`Felipe ${fmt(g.F)} · Bugsy ${fmt(g.B)}`):(g.F?"Felipe":"Bugsy");
- $("#tbl-upg tbody").innerHTML=G.map(g=>`<tr><td class="num">${g.d}</td><td>${esc(g.k)}</td><td>${who(g)}</td><td class="r num">${fmt(g.amt)}</td><td class="r num">${fmt(g.amt/2)}</td></tr>`).join("")||`<tr><td colspan="5" style="color:var(--muted)">No mods yet.</td></tr>`;
+ $("#tbl-upg tbody").innerHTML=G.map(g=>`<tr><td class="num">${g.d}</td><td>${esc(g.k)}${(()=>{const b=BI.find(z=>z.mod===g.k);return b?` <span class="pill ${BST[b.status][1]}">${BST[b.status][0]}</span>`:""})()}</td><td>${who(g)}</td><td class="r num">${fmt(g.amt)}</td><td class="r num">${fmt(g.amt/2)}</td></tr>`).join("")||`<tr><td colspan="5" style="color:var(--muted)">No mods yet.</td></tr>`;
  $("#tbl-upg tfoot").innerHTML=`<tr><td></td><td>Total</td><td></td><td class="r num">${fmt(ut)}</td><td class="r num">${fmt(ut/2)}</td></tr>`;
  $("#upg-sum").innerHTML=`<div class="tile"><div class="k">Spent on mods</div><div class="v">${fmt0(ut)}</div><div class="s">${G.length} mods</div></div>
   <div class="tile"><div class="k">Paid by Felipe</div><div class="v">${fmt0(uf)}</div><div class="s">incl. half of split items</div></div>
@@ -1274,7 +1477,7 @@ const live={ok:false,state:"loading",session:null,editor:false,syncedAt:null,err
 let db=null;
 try{if(window.supabase)db=supabase.createClient(SB_URL,SB_KEY,{auth:{flowType:"pkce",detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}})}catch(e){db=null}
 
-function renderMoney(){renderLedger();renderUpgrades();renderOverviewMoney();if(window.updateCounts)updateCounts()}
+function renderMoney(){renderLedger();renderUpgrades();renderOverviewMoney();renderBuild();if(window.updateCounts)updateCounts()}
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("on"),2600)}
 
 async function loadLive(){
@@ -1432,6 +1635,7 @@ function openEntry(entry,prefill){
   <div class="ff"><label for="en-date">Date</label><input id="en-date" type="date" value="${e.d||today()}" required><p class="ferr" hidden></p></div>
   <div class="ff"><label for="en-item">Item</label><input id="en-item" type="text" value="${esc(e.item||p.item||"")}" placeholder="e.g. Hawk DTC-60 front pads" required><p class="ferr" hidden></p></div>
   <div class="ff" id="en-mod-f"><label for="en-mod">Upgrade group <span class="opt">optional</span></label><input id="en-mod" type="text" list="en-mods" value="${esc(e.mod||"")}" autocomplete="off"><datalist id="en-mods">${mods.map(m=>`<option value="${esc(m)}">`).join("")}</datalist><p class="hint">Payments with the same group add up to one mod on the Upgrades page.</p><p class="ferr" hidden></p></div>
+  <div id="en-build"></div>
   <fieldset class="ff"><legend id="en-paid-l">Paid by</legend><div class="choice">${["Felipe","Bugsy","Split"].map(w=>`<label><input type="radio" name="en-paid" value="${w}"${w===paid?" checked":""}><span>${w==="Split"?"Split 50/50":w}</span></label>`).join("")}</div></fieldset>
   <div class="ff"><label for="en-amt" id="en-amt-l">Amount (USD)</label><input id="en-amt" type="number" inputmode="decimal" step="0.01" min="0.01" value="${amt}" required><p class="ferr" hidden></p></div>
   <div class="effect" id="en-effect" aria-live="polite"></div>
@@ -1442,7 +1646,9 @@ function openEntry(entry,prefill){
   const f=$("#f-en");
   const ok=bindValidation(f,{"en-date":v=>v?"":"Pick the date it was paid or sold.","en-item":v=>v.trim()?"":"Describe what it was, so you both recognise it later.","en-amt":v=>(+v>0)?"":"Enter an amount above $0."});
   const cur=()=>({type:f.querySelector("[name=en-type]:checked").value,paid:f.querySelector("[name=en-paid]:checked").value,amt:+$("#en-amt").value||0});
+  let boxType=null;
   const sync=()=>{const c=cur(),sale=c.type==="Sale";
+   if(!entry&&db&&c.type!==boxType){boxType=c.type;$("#en-build").innerHTML=buildBoxHTML(c.type,p);if($("#en-build").innerHTML)wireBuildBox(f,p)}
    $("#en-mod-f").hidden=!(c.type==="Part"||c.type==="Deposit");
    $("#en-paid-l").textContent=sale?"Received by":"Paid by";
    $("#en-amt-l").textContent=sale?"Sold for (USD)":"Amount (USD)";
@@ -1460,7 +1666,8 @@ function openEntry(entry,prefill){
    if(!r.error&&(!r.data||!r.data.length))r.error={message:"permission denied"};
    if(r.error){b.disabled=false;b.textContent=entry?"Save changes":"Add entry";$("#en-err").textContent="Couldn't save. "+friendly(r.error)+" Your details are still in the form.";$("#en-err").hidden=false;return}
    if(p.plannedId)await db.from("planned_purchases").delete().eq("id",p.plannedId);
-   closeDrawer();toast(entry?"Changes saved":(p.plannedId?"Moved to the ledger":"Entry added"));loadLive();
+   const bmsg=entry?"":await applyBuildFromEntry(row,r.data[0],p);
+   closeDrawer();toast((entry?"Changes saved":(p.plannedId?"Moved to the ledger":"Entry added"))+(bmsg?". "+bmsg:""));loadLive();
   });
   if(entry)$("#en-del").addEventListener("click",()=>confirmDelete("#en-confirm",`Delete “${entry.item}”? This removes it from the ledger for both of you.`,"Delete entry",async()=>{
    const r=await db.from("ledger_entries").delete().eq("id",entry.id).select();
@@ -1532,12 +1739,13 @@ paintSync();
 /* ---------- live: issues, service items, notes ---------- */
 async function loadWork(){
  if(!db)return;
- const [i,s,n]=await Promise.all([db.from("issues").select("*").order("sort").order("created_at"),db.from("service_items").select("*").order("sort").order("created_at"),db.from("notes").select("*").order("created_at",{ascending:false})]);
+ const [i,s,n,bq]=await Promise.all([db.from("issues").select("*").order("sort").order("created_at"),db.from("service_items").select("*").order("sort").order("created_at"),db.from("notes").select("*").order("created_at",{ascending:false}),db.from("build_items").select("*").order("sort").order("created_at")]);
  if(i.error||s.error||n.error)throw(i.error||s.error||n.error);
+ if(!bq.error)BI=bq.data;
  ISS=i.data.map(r=>({id:r.id,owner:r.owner,cat:r.category,upd_at:r.updated_at,upd_by:r.updated_by,t:r.title,src:r.source,n:r.notes,p:r.priority,resolved:r.resolved,resolved_on:r.resolved_on,resolution:r.resolution,sort:r.sort}));
  SVC=s.data.map(r=>({id:r.id,owner:r.owner,upd_at:r.updated_at,upd_by:r.updated_by,t:r.item,last:r.last_done,s:r.status,prev:r.prev_status,done_on:r.done_on,n:r.notes,sort:r.sort}));
  NOTES=n.data;
- renderWork();renderNotes();
+ renderWork();renderNotes();renderBuild();
 }
 async function save(table,id,row,revert){
  const r=await db.from(table).update(row).eq("id",id).select();
