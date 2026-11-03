@@ -1369,6 +1369,7 @@ const authMsg=e=>{const m=(e&&e.message)||"";
  if(/signups? not allowed|signup.*disabled/i.test(m))return"Creating accounts is switched off in Supabase. If you already have an account, choose Sign in. Otherwise turn on Authentication → Sign In / Providers → Allow new users to sign up.";
  if(/database error saving new user|limited to the E46 owners/i.test(m))return"Only Felipe's and Bugsy's emails can have an account here.";
  if(/already registered|already exists/i.test(m))return"There's already an account for this email. Choose Sign in. If you only used email links before, sign in on a device where you're still signed in and choose Set password.";
+ if(/email rate limit/i.test(m))return"Supabase is still trying to send a confirmation email for new accounts, and it has hit its email limit. Turn off Authentication → Sign In / Providers → Email → Confirm email, save, then try again.";
  if(/rate|429/i.test(m))return"Too many attempts in a short time. Wait a minute, then try again.";
  if(/password.*(weak|short|characters)/i.test(m))return"That password is too weak. Use at least 8 characters, mixing letters and numbers.";
  return friendly(e)};
