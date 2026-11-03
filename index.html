@@ -150,8 +150,8 @@ tfoot td{font-weight:600}
 .carsvg .tail{fill:color-mix(in srgb,var(--crit) 55%,var(--surface));stroke:var(--fg);stroke-width:1}
 .carsvg .ground{stroke:var(--line);stroke-width:2}
 .hot{cursor:pointer;outline:none}
-.hot circle.ring{fill:var(--fern);stroke:var(--surface);stroke-width:2.5;transition:r .15s}
-.hot text{fill:var(--fern-ink);font-family:var(--mono);font-size:12px;font-weight:500;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.hot circle.ring{fill:var(--fern);stroke:#fff;stroke-width:4;transition:r .15s}
+.hot text{fill:var(--fern-ink);font-family:var(--mono);font-size:30px;font-weight:500;text-anchor:middle;dominant-baseline:central;pointer-events:none}
 .hot .halo{fill:var(--fern);opacity:0}
 .hot:hover .halo,.hot:focus-visible .halo{opacity:.22}
 .hot[aria-pressed="true"] circle.ring{fill:var(--warn)}
@@ -427,6 +427,10 @@ body.can-edit .ro-only{display:none!important}
 .case-ro{background:var(--surface-2);border-radius:8px;padding:12px;margin-bottom:16px}
 .src .who{font-weight:600;color:var(--fg)}
 #iss-cat{margin-right:auto}
+.carsvg{background:#fdfdfd;border-radius:8px}
+.hot circle.ring{filter:drop-shadow(0 2px 3px rgb(0 0 0 / .35))}
+.map-layout{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+@media (max-width:960px){.map-layout{grid-template-columns:1fr}}
 </style>
 
 <div class="app">
@@ -530,20 +534,8 @@ body.can-edit .ro-only{display:none!important}
       <div class="card">
         <h2>Where the work was done</h2>
         <p class="lede">Select a point on the car to see every job on that part, oldest first. The number is how many records touch it.</p>
-        <svg class="carsvg" id="carsvg" viewBox="0 0 800 300" role="group" aria-label="Side view of the E46 coupe with selectable areas">
-          <line class="ground" x1="20" y1="268" x2="780" y2="268"/>
-          <path class="body" d="M62,232 C50,226 44,212 46,196 C47,184 50,176 58,170 L92,160 C150,150 230,142 288,137 C318,118 350,98 380,87 C420,78 470,76 505,80 C540,85 568,100 594,114 C630,118 668,120 694,124 C708,127 714,134 716,146 L720,178 C721,198 716,214 704,226 L690,232 L642,232 A42,42 0 0 0 558,232 L227,236 A42,42 0 0 0 143,232 Z"/>
-          <path class="glass" d="M306,134 C334,114 358,100 382,92 C420,84 462,82 498,86 C520,89 538,98 556,110 L548,128 C470,130 380,132 306,134 Z"/>
-          <path class="line" d="M462,84 L466,131"/>
-          <path class="line" d="M300,140 L298,226 M462,134 L470,226 M300,226 L470,226"/>
-          <path class="line" d="M92,160 L288,137"/>
-          <path class="line" d="M600,116 L604,124 L694,126"/>
-          <path class="line" d="M232,200 C320,196 460,196 552,200"/>
-          <path class="lamp" d="M52,176 L88,165 L94,176 L58,186 Z"/>
-          <path class="tail" d="M700,132 L716,140 L718,160 L700,158 Z"/>
-          <path class="body" d="M312,128 l18,-6 l4,12 l-20,4 z" style="stroke-width:1.5"/>
-          <circle class="tyre" cx="185" cy="232" r="34"/><circle class="rim" cx="185" cy="232" r="22"/>
-          <circle class="tyre" cx="600" cy="232" r="34"/><circle class="rim" cx="600" cy="232" r="22"/>
+        <svg class="carsvg" id="carsvg" viewBox="0 0 1448 586" role="group" aria-label="Illustration of the E46 coupe with selectable areas">
+          <image href="/car-map.jpg" x="0" y="0" width="1448" height="586" preserveAspectRatio="xMidYMid meet"/>
           <g id="hotspots"></g>
         </svg>
         <div class="zones" id="zones" role="group" aria-label="Areas of the car"></div>
@@ -1161,24 +1153,24 @@ renderUpgrades();
 /* car map */
 (function(){
  const Z=[
-  {id:"cooling",name:"Radiator & cooling",x:78,y:196,re:/radiator|coolant|water pump|thermostat|expansion tank|bleeder|heater|water pipe|water valve|coolant pipe|thermo switch/i,cats:["Cooling"]},
-  {id:"engine",name:"Engine",x:200,y:150,re:/engine|oil(?! level sensor)|valve cover|vanos|injector|coil|spark|ccv|crankcase|breather|intake|throttle|idle|fuel trim|gas cap|rod bearing|baffle|header|tensioner|idler|drive belt|main drive belt|pulley|secondary air|maf|air mass|dyno|ecu|dme|tune|emissions|misfire|oil pressure/i,cats:["Engine","Engine swap","Tuning"]},
-  {id:"ac",name:"A/C & climate",x:280,y:112,re:/a\/c|evaporator|condens|compressor|refrigerant|blower|receiver drier|expansion valve|suction line/i,cats:["A/C"]},
-  {id:"frontsus",name:"Front suspension & steering",x:185,y:178,re:/strut|camber|control arm|tie.?rod|p\/s|power steering|steering|sway bar|alignment|front.*bushing/i,cats:["Steering"]},
-  {id:"brakes",name:"Brakes",x:185,y:232,re:/brake|rotor|pads?\b|caliper|master cylinder|abs|speed sensor/i,cats:["Brakes"]},
-  {id:"trans",name:"Clutch & gearbox",x:345,y:236,re:/clutch|flywheel|gearbox|transmission|shift|pilot bearing|input shaft|guibo|trans mount|rear main seal/i,cats:[]},
-  {id:"fuel",name:"Fuel system",x:470,y:236,re:/fuel pump|fuel filter|gas cap|purge|tank leak/i,cats:[]},
-  {id:"diff",name:"Diff & axles",x:548,y:212,re:/diff|axle|lsd/i,cats:[]},
-  {id:"rearsus",name:"Rear suspension & subframe",x:600,y:176,re:/subframe|rear shock|shock mount|trailing arm|rear.*camber|rear upper/i,cats:["Chassis"]},
-  {id:"wheels",name:"Wheels & tyres",x:600,y:232,re:/tyre|tire|wheel(?! bearing)|rims?\b/i,cats:["Wheels & tyres"]},
-  {id:"electrical",name:"Battery & electrical (trunk)",x:676,y:146,re:/battery|fuse|horn|bulb|turn signal|light|speaker|charging/i,cats:["Electrical"]},
-  {id:"cabin",name:"Interior & safety",x:420,y:108,re:/airbag|seat|harness|gauge|wiper|cabin filter|recall/i,cats:["Safety"]},
-  {id:"body",name:"Body & doors",x:384,y:182,re:/door|window|mirror|fender liner|roundel|reflector|washer|hood|damage|emblem|grille/i,cats:["Body"]}
+  {id:"cooling",name:"Radiator & cooling",x:225,y:440,re:/radiator|coolant|water pump|thermostat|expansion tank|bleeder|heater|water pipe|water valve|coolant pipe|thermo switch/i,cats:["Cooling"]},
+  {id:"engine",name:"Engine",x:330,y:255,re:/engine|oil(?! level sensor)|valve cover|vanos|injector|coil|spark|ccv|crankcase|breather|intake|throttle|idle|fuel trim|gas cap|rod bearing|baffle|header|tensioner|idler|drive belt|main drive belt|pulley|secondary air|maf|air mass|dyno|ecu|dme|tune|emissions|misfire|oil pressure/i,cats:["Engine","Engine swap","Tuning"]},
+  {id:"ac",name:"A/C & climate",x:560,y:196,re:/a\/c|evaporator|condens|compressor|refrigerant|blower|receiver drier|expansion valve|suction line/i,cats:["A/C"]},
+  {id:"frontsus",name:"Front suspension & steering",x:575,y:322,re:/strut|camber|control arm|tie.?rod|p\/s|power steering|steering|sway bar|alignment|front.*bushing/i,cats:["Steering"]},
+  {id:"brakes",name:"Brakes",x:580,y:452,re:/brake|rotor|pads?\b|caliper|master cylinder|abs|speed sensor/i,cats:["Brakes"]},
+  {id:"trans",name:"Clutch & gearbox",x:860,y:428,re:/clutch|flywheel|gearbox|transmission|shift|pilot bearing|input shaft|guibo|trans mount|rear main seal/i,cats:[]},
+  {id:"fuel",name:"Fuel system",x:1110,y:375,re:/fuel pump|fuel filter|gas cap|purge|tank leak/i,cats:[]},
+  {id:"diff",name:"Diff & axles",x:1150,y:445,re:/diff|axle|lsd/i,cats:[]},
+  {id:"rearsus",name:"Rear suspension & subframe",x:1268,y:280,re:/subframe|rear shock|shock mount|trailing arm|rear.*camber|rear upper/i,cats:["Chassis"]},
+  {id:"wheels",name:"Wheels & tyres",x:1272,y:398,re:/tyre|tire|wheel(?! bearing)|rims?\b/i,cats:["Wheels & tyres"]},
+  {id:"electrical",name:"Battery & electrical (trunk)",x:1330,y:192,re:/battery|fuse|horn|bulb|turn signal|light|speaker|charging/i,cats:["Electrical"]},
+  {id:"cabin",name:"Interior & safety",x:930,y:140,re:/airbag|seat|harness|gauge|wiper|cabin filter|recall/i,cats:["Safety"]},
+  {id:"body",name:"Body & doors",x:960,y:295,re:/door|window|mirror|fender liner|roundel|reflector|washer|hood|damage|emblem|grille/i,cats:["Body"]}
  ];
  const skip=r=>r.cats.includes("Ownership")||r.cats.includes("Inspection")&&!/found/i.test(r.note||"");
  const recs=Z.map(z=>({z,list:R.filter(r=>{if(r.cats.includes("Ownership"))return false;const txt=[r.t,...r.items].join(" ");return z.re.test(txt)||z.cats.some(c=>r.cats[0]===c)}).sort((a,b)=>dNum(a.d)-dNum(b.d))}));
  const g=document.getElementById("hotspots");
- g.innerHTML=recs.map(({z,list})=>`<g class="hot${list.length?"":" empty"}" tabindex="0" role="button" aria-pressed="false" data-z="${z.id}" aria-label="${z.name}: ${list.length} records"><circle class="halo" cx="${z.x}" cy="${z.y}" r="22"/><circle class="ring" cx="${z.x}" cy="${z.y}" r="13"/><text x="${z.x}" y="${z.y}">${list.length}</text><title>${z.name}</title></g>`).join("");
+ g.innerHTML=recs.map(({z,list})=>`<g class="hot${list.length?"":" empty"}" tabindex="0" role="button" aria-pressed="false" data-z="${z.id}" aria-label="${z.name}: ${list.length} records"><circle class="halo" cx="${z.x}" cy="${z.y}" r="52"/><circle class="ring" cx="${z.x}" cy="${z.y}" r="34"/><text x="${z.x}" y="${z.y}">${list.length}</text><title>${z.name}</title></g>`).join("");
  $("#zones").innerHTML=recs.map(({z,list})=>`<button class="zbtn" type="button" aria-pressed="false" data-z="${z.id}">${z.name}<b>${list.length}</b></button>`).join("");
  function pick(id){
   const {z,list}=recs.find(x=>x.z.id===id);
