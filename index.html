@@ -424,6 +424,7 @@ body.can-edit .ro-only{display:none!important}
 .case-dl .muted{color:var(--muted)}
 @media (max-width:420px){.case-dl>div{grid-template-columns:1fr;gap:2px}}
 .case-meta{color:var(--muted);font-size:12.5px;margin:10px 0 16px}
+.case-ro{background:var(--surface-2);border-radius:8px;padding:12px;margin-bottom:16px}
 </style>
 
 <div class="app">
@@ -561,6 +562,7 @@ body.can-edit .ro-only{display:none!important}
 
   <!-- TODO -->
   <section class="panel" id="todo" aria-labelledby="sectitle" hidden>
+    <div class="card ro-only signin-hint" style="margin-bottom:16px"><p>You're viewing read-only. Sign in as Felipe or Bugsy to change statuses, mark items completed or add new ones.</p><button class="btn primary" type="button" data-act="signin"><svg-i name="login"></svg-i>Sign in to edit</button></div>
     <div class="card">
       <div class="cardhead">
         <div><h2>Known issues</h2><p class="lede">From the listing, the seller's comments and what you've noticed driving it. Most urgent first.</p></div>
@@ -1634,7 +1636,7 @@ function issueCaseHTML(x){
  const cur=x.resolved?"done":x.p;
  return caseShell(x.id,"issue",`
   <div class="case-head"><span class="pill ${x.resolved?"p-ok":PL[x.p][1]}">${x.resolved?"Completed":PL[x.p][0]}</span><h3>${esc(x.t)}</h3></div>
-  ${statusPicker("cs",ISTAT,cur,"Status")}
+  ${statusPicker("cs",ISTAT,cur,"Status")}<div class="ro-only signin-hint case-ro"><p>Sign in as Felipe or Bugsy to change the status or mark it completed.</p><button class="btn primary" type="button" data-act="signin">${svgI("login")}Sign in to edit</button></div>
   <div id="cs-done" class="ed-only"${cur==="done"?"":" hidden"}>
    <div class="ff"><label for="cs-on">Completed on</label><input id="cs-on" type="date" value="${x.resolved_on||today()}"><p class="ferr" hidden></p></div>
    <div class="ff"><label for="cs-res">What was done <span class="opt">optional</span></label><textarea id="cs-res" placeholder="e.g. Replaced with Turner delrin bearing cup">${esc(x.resolution||"")}</textarea><p class="ferr" hidden></p></div>
@@ -1651,7 +1653,7 @@ function issueCaseHTML(x){
 function dueCaseHTML(x){
  return caseShell(x.id,"due",`
   <div class="case-head"><span class="pill ${DL[x.s][1]}">${x.s==="ok"?"Completed":DL[x.s][0]}</span><h3>${esc(x.t)}</h3></div>
-  ${statusPicker("cs",DSTAT,x.s,"Status")}
+  ${statusPicker("cs",DSTAT,x.s,"Status")}<div class="ro-only signin-hint case-ro"><p>Sign in as Felipe or Bugsy to change the status or mark it completed.</p><button class="btn primary" type="button" data-act="signin">${svgI("login")}Sign in to edit</button></div>
   <div id="cs-done" class="ed-only"${x.s==="ok"?"":" hidden"}>
    <div class="ff"><label for="cs-on">Completed on</label><input id="cs-on" type="date" value="${x.done_on||today()}"><p class="ferr" hidden></p></div>
    <div class="ff"><label for="cs-last">Done where / how <span class="opt">optional</span></label><input id="cs-last" type="text" value="${esc(x.s==="ok"?(x.last||""):"")}" placeholder="e.g. ASR Performance, Motul 75W-90"><p class="ferr" hidden></p></div>
